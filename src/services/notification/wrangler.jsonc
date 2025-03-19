@@ -1,12 +1,10 @@
 {
-    "name": "petsitter-notification-service",
-    "main": "index.ts",
-    "compatibility_date": "2025-03-07",
-    "compatibility_flags": ["nodejs_compat"],
-    "observability": {
-      "enabled": true,
-      "head_sampling_rate": 1
-    },
-    "routes": ["https://woof-3ev.pages.dev/"]
+  "name": "petsitter-notification-worker",
+  "main": "index.ts",
+  "compatibility_date": "2025-03-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
   }
-  
+}
