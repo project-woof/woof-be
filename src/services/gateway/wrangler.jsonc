@@ -5,14 +5,6 @@
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true,
-    "head_sampling_rate": 1,
-  },
-  "vars": {
-    "AUTH_SERVICE_URL": "https://auth-service.example.workers.dev",
-    "BOOKING_SERVICE_URL": "https://booking-service.example.workers.dev",
-    "PROFILE_SERVICE_URL": "https://profile-service.example.workers.dev",
-    "CHAT_SERVICE_URL": "https://chat-service.example.workers.dev",
-    "NOTIFICATION_SERVICE_URL": "https://notification-service.example.workers.dev",
-    "REVIEW_SERVICE_URL": "https://review-service.example.workers.dev"
-  },
+    "head_sampling_rate": 1
+  }
 }
