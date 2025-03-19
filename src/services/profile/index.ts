@@ -16,7 +16,7 @@ export default {
     const url = new URL(request.url);
 
     // Health check endpoint
-    if (url.pathname === "/profile/health") {
+    if (url.pathname === "/health") {
       const healthData = {
         status: "ok",
         timestamp: new Date().toISOString(),
@@ -27,7 +27,6 @@ export default {
       });
     }
 
-    // Placeholder: Add your profile-related logic here.
     return new Response("Profile Service: Route not found", { status: 404 });
   },
 };
