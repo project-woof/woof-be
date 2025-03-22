@@ -1,7 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
 
-// Define interfaces for our data models based on your actual DB schema
+// Define interfaces for our data models based on the DB schema
 interface UserProfile {
+  user_id?: string;
   username: string;
   email: string;
   profile_image_url?: string;
@@ -9,6 +10,8 @@ interface UserProfile {
   longitude?: number;
   description?: string;
   is_petsitter?: number; // 0: false, 1: true
+  created_at?: string;
+  last_updated?: string;
 }
 
 export interface Env {

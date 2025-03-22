@@ -4,12 +4,15 @@ export interface Env {
   PETSITTER_DB: D1Database;
 }
 
-// Update interface to match new data structure
+// Interface to match the review table structure
 interface ReviewData {
+  review_id?: string;
   reviewer_id?: string;
   reviewee_id?: string;
   rating?: number;
   comment?: string;
+  created_at?: string;
+  last_updated?: string;
 }
 
 export default {
