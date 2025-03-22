@@ -6,5 +6,12 @@
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "PETSITTER_DB",
+      "database_name": "petsitter-db",
+      "database_id": "0a80dcb1-42f0-49fa-9f34-786069b5ab1b",
+    }
+  ]
 }

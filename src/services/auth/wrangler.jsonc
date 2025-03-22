@@ -1,10 +1,18 @@
 {
   "name": "petsitter-auth-worker",
   "main": "index.ts",
+  "account_id": "037cce003194d6cd56e2115a00d24321",
   "compatibility_date": "2025-03-07",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "PETSITTER_DB",
+      "database_name": "petsitter-db",
+      "database_id": "0a80dcb1-42f0-49fa-9f34-786069b5ab1b"
+    }
+  ]
 }
