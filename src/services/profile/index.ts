@@ -1,7 +1,8 @@
 /// <reference types="@cloudflare/workers-types" />
 
-// Define interfaces for our data models based on your actual DB schema
+// Define interfaces for our data models based on the DB schema
 interface UserProfile {
+  user_id?: string;
   username: string;
   email: string;
   profile_image_url?: string;
@@ -9,6 +10,8 @@ interface UserProfile {
   longitude?: number;
   description?: string;
   is_petsitter?: number; // 0: false, 1: true
+  created_at?: string;
+  last_updated?: string;
 }
 
 export interface Env {
@@ -45,6 +48,11 @@ export default {
         status: 200,
         headers: corsHeaders,
       });
+    }
+
+    // Add check endpoint for backward compatibility with signup flow
+    if (path === "/check") {
+      return handleCheckProfile(request, env);
     }
 
     // Profile endpoints
@@ -84,6 +92,58 @@ function handleCors(): Response {
   });
 }
 
+// Add check endpoint handler for backward compatibility with signup flow
+async function handleCheckProfile(
+  request: Request,
+  env: Env
+): Promise<Response> {
+  try {
+    if (request.method !== "POST") {
+      return new Response(JSON.stringify({ error: "Method not allowed" }), {
+        status: 405,
+        headers: corsHeaders,
+      });
+    }
+
+    const data = await request.json() as { email: string };
+    
+    if (!data.email) {
+      return new Response(JSON.stringify({ error: "Email is required" }), {
+        status: 400,
+        headers: corsHeaders,
+      });
+    }
+
+    // Check if user exists in database
+    const user = await env.PETSITTER_DB.prepare(
+      "SELECT * FROM user WHERE email = ?"
+    )
+      .bind(data.email)
+      .first();
+
+    return new Response(
+      JSON.stringify({
+        exists: !!user,
+        // Map is_petsitter to userType for backward compatibility
+        userType: user ? (user.is_petsitter === 1 ? 'both' : 'petowner') : null,
+      }),
+      {
+        status: 200,
+        headers: corsHeaders,
+      }
+    );
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: "Failed to check user" }),
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
+    );
+  }
+}
+
+
 async function handleCreateProfile(
   request: Request,
   env: Env
@@ -108,8 +168,61 @@ async function handleCreateProfile(
       });
     }
 
-    // Validate required fields
-    const profileData = data as Partial<UserProfile>;
+    // Handle both new format and old format requests
+    let profileData: Partial<UserProfile>;
+    
+    // Check if this is using the old format (from signup flow)
+    if ('userType' in data && 'name' in data && 'email' in data) {
+      const oldData = data as { email: string; name: string; picture?: string; userType: 'petowner' | 'both' };
+      
+      // Check if user already exists
+      const existingUser = await env.PETSITTER_DB.prepare(
+        "SELECT * FROM user WHERE email = ?"
+      )
+        .bind(oldData.email)
+        .first();
+
+      if (existingUser) {
+        return new Response(
+          JSON.stringify({ error: "User already exists" }),
+          {
+            status: 409,
+            headers: corsHeaders,
+          }
+        );
+      }
+      
+      // Convert old format to new format
+      profileData = {
+        username: oldData.name,
+        email: oldData.email,
+        profile_image_url: oldData.picture,
+        is_petsitter: oldData.userType === 'both' ? 1 : 0
+      };
+    } else {
+      // New format
+      profileData = data as Partial<UserProfile>;
+      
+      // Check if user already exists
+      if (profileData.email) {
+        const existingUser = await env.PETSITTER_DB.prepare(
+          "SELECT * FROM user WHERE email = ?"
+        )
+          .bind(profileData.email)
+          .first();
+
+        if (existingUser) {
+          return new Response(
+            JSON.stringify({ error: "User already exists" }),
+            {
+              status: 409,
+              headers: corsHeaders,
+            }
+          );
+        }
+      }
+    }
+
     if (!profileData.username || !profileData.email) {
       return new Response(
         JSON.stringify({ error: "Username and email are required" }),
@@ -163,12 +276,19 @@ async function handleCreateProfile(
       }
     }
 
+    // For backward compatibility with signup flow
+    const responseData = {
+      message: "Profile created successfully",
+      user_id: userId,
+      user: {
+        ...newUser,
+        // Include userType for backward compatibility
+        userType: newUser.is_petsitter === 1 ? 'both' : 'petowner'
+      }
+    };
+
     return new Response(
-      JSON.stringify({
-        message: "Profile created successfully",
-        user_id: userId,
-        user: newUser,
-      }),
+      JSON.stringify(responseData),
       {
         status: 201,
         headers: corsHeaders,
@@ -270,8 +390,21 @@ async function handleUpdateProfile(
       });
     }
 
-    // Cast to our interface
-    const profileData = data as Partial<UserProfile>;
+    // Handle both new format and old format requests
+    let profileData: Partial<UserProfile>;
+    
+    // Check if this is using the old format (from signup flow)
+    if ('userType' in data) {
+      const oldData = data as { userType: 'petowner' | 'both' };
+      
+      // Convert old format to new format
+      profileData = {
+        is_petsitter: oldData.userType === 'both' ? 1 : 0
+      };
+    } else {
+      // New format
+      profileData = data as Partial<UserProfile>;
+    }
 
     // Build dynamic update SQL based on provided fields
     const fieldUpdates = [];
