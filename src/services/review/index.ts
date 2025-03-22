@@ -265,7 +265,7 @@ async function getReviewsByRevieweeId(env: Env, revieweeId: string, headers: Hea
   const { results } = await env.PETSITTER_DB.prepare(
     `SELECT review.*, user.username, user.profile_image_url
      FROM review 
-     JOIN user ON review.reviewee_id = user.user_id 
+     JOIN user ON review.reviewer_id = user.user_id 
      WHERE reviewee_id = ? 
      ORDER BY review.created_at DESC 
      LIMIT ? OFFSET ?`

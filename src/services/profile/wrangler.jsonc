@@ -18,7 +18,8 @@
   "r2_buckets": [
     {
       "binding": "PETSITTER_STORAGE",
-      "bucket_name": "petsitter-storage"
+      "bucket_name": "petsitter-storage",
+      "preview_bucket_name": "petsitter-storage-dev"
     }
   ]
 }
