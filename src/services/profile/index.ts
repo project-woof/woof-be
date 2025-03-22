@@ -140,6 +140,7 @@ async function handleCheckProfile(
   }
 }
 
+
 async function handleCreateProfile(
   request: Request,
   env: Env
@@ -219,7 +220,6 @@ async function handleCreateProfile(
       }
     }
 
-    // Validate required fields
     if (!profileData.username || !profileData.email) {
       return new Response(
         JSON.stringify({ error: "Username and email are required" }),
@@ -574,4 +574,3 @@ async function handleDeleteProfile(
       }
     );
   }
-}
