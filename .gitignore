@@ -7,3 +7,5 @@ dist-ssr
 .dev.vars
 .env
 /db
+.vars
+.vscode
