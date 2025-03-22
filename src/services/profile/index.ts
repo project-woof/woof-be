@@ -17,8 +17,21 @@ export interface Env {
   PETSITTER_STORAGE: R2Bucket;
 }
 
+// Define CORS headers as a constant to use consistently across all responses
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Content-Type": "application/json"
+};
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    // Handle CORS preflight requests
+    if (request.method === "OPTIONS") {
+      return handleCors();
+    }
+
     const url = new URL(request.url);
     const path = url.pathname;
 
@@ -30,7 +43,7 @@ export default {
       };
       return new Response(JSON.stringify(healthData), {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -51,9 +64,25 @@ export default {
       return handleDeleteProfile(request, env);
     }
 
-    return new Response("Profile Service: Route not found", { status: 404 });
+    return new Response("Profile Service: Route not found", { 
+      status: 404,
+      headers: corsHeaders
+    });
   },
 };
+
+// CORS handler for preflight requests
+function handleCors(): Response {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
+}
 
 async function handleCreateProfile(
   request: Request,
@@ -64,7 +93,7 @@ async function handleCreateProfile(
     if (request.method !== "POST") {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -75,7 +104,7 @@ async function handleCreateProfile(
     if (typeof data !== "object" || data === null) {
       return new Response(JSON.stringify({ error: "Invalid data format" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -86,7 +115,7 @@ async function handleCreateProfile(
         JSON.stringify({ error: "Username and email are required" }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: corsHeaders,
         }
       );
     }
@@ -142,7 +171,7 @@ async function handleCreateProfile(
       }),
       {
         status: 201,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       }
     );
   } catch (error) {
@@ -153,7 +182,7 @@ async function handleCreateProfile(
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       }
     );
   }
@@ -168,7 +197,7 @@ async function handleGetProfile(request: Request, env: Env): Promise<Response> {
     if (!userId) {
       return new Response(JSON.stringify({ error: "User ID is required" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -186,13 +215,13 @@ async function handleGetProfile(request: Request, env: Env): Promise<Response> {
     if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
     return new Response(JSON.stringify(user), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers: corsHeaders,
     });
   } catch (error) {
     return new Response(
@@ -202,7 +231,7 @@ async function handleGetProfile(request: Request, env: Env): Promise<Response> {
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       }
     );
   }
@@ -216,7 +245,7 @@ async function handleUpdateProfile(
     if (request.method !== "PUT" && request.method !== "PATCH") {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -227,7 +256,7 @@ async function handleUpdateProfile(
     if (!userId) {
       return new Response(JSON.stringify({ error: "User ID is required in query parameters" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -237,7 +266,7 @@ async function handleUpdateProfile(
     if (typeof data !== "object" || data === null) {
       return new Response(JSON.stringify({ error: "Invalid data format" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -298,7 +327,7 @@ async function handleUpdateProfile(
         }),
         {
           status: 200,
-          headers: { "Content-Type": "application/json" },
+          headers: corsHeaders,
         }
       );
     }
@@ -313,7 +342,7 @@ async function handleUpdateProfile(
     if (!result.meta || result.meta.affected_rows === 0) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
 
@@ -325,7 +354,7 @@ async function handleUpdateProfile(
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       }
     );
   } catch (error) {
@@ -336,7 +365,7 @@ async function handleUpdateProfile(
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       }
     );
   }
@@ -350,7 +379,7 @@ async function handleDeleteProfile(
     if (request.method !== "DELETE") {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
     
@@ -359,7 +388,7 @@ async function handleDeleteProfile(
     if (!userId) {
       return new Response(JSON.stringify({ error: "User ID is required" }), {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
     
@@ -373,7 +402,7 @@ async function handleDeleteProfile(
     if (!userCheck) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
     
@@ -388,7 +417,7 @@ async function handleDeleteProfile(
     if (!result.meta || result.meta.affected_rows === 0) {
       return new Response(JSON.stringify({ error: "Failed to delete user" }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       });
     }
     
@@ -400,7 +429,7 @@ async function handleDeleteProfile(
       }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       }
     );
   } catch (error) {
@@ -411,7 +440,7 @@ async function handleDeleteProfile(
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: corsHeaders,
       }
     );
   }
