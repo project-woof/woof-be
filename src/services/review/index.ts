@@ -16,7 +16,6 @@ export default {
   async fetch(
     request: Request,
     env: Env,
-    ctx: ExecutionContext
   ): Promise<Response> {
     // Handle CORS preflight requests
     if (request.method === "OPTIONS") {
@@ -244,10 +243,29 @@ async function getReviewsByRevieweeId(env: Env, revieweeId: string, headers: Hea
   const countResult = await env.PETSITTER_DB.prepare(
     "SELECT COUNT(*) as total FROM review WHERE reviewee_id = ?"
   ).bind(revieweeId).first();
+  
   const total = countResult ? (countResult.total as number) : 0;
   
+  // Get sum of ratings for this reviewee
+  const ratingResult = await env.PETSITTER_DB.prepare(
+    "SELECT SUM(rating) as sum_rating FROM review WHERE reviewee_id = ?"
+  ).bind(revieweeId).first();
+  
+  const sumRating = ratingResult ? (ratingResult.sum_rating as number) : 0;
+  
+  // Update the petsitter table with new totals
+  await env.PETSITTER_DB.prepare(
+    "UPDATE petsitter SET total_reviews = ?, sum_of_rating = ? WHERE user_id = ?"
+  ).bind(total, sumRating, revieweeId).run();
+  
+  // Modified query to join with the User table
   const { results } = await env.PETSITTER_DB.prepare(
-    "SELECT * FROM review WHERE reviewee_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?"
+    `SELECT review.*, user.username, user.profile_image_url
+     FROM review 
+     JOIN user ON review.reviewee_id = user.user_id 
+     WHERE reviewee_id = ? 
+     ORDER BY review.created_at DESC 
+     LIMIT ? OFFSET ?`
   ).bind(revieweeId, limit, offset).all();
   
   return new Response(JSON.stringify({
