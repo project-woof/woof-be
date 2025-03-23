@@ -32,7 +32,9 @@
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.0.6",
     "tailwindcss-animate": "^1.0.7",
-    "unenv": "^1.10.0"
+    "unenv": "^1.10.0",
+    "uuid": "^11.1.0",
+    "woof": "file:"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250319.0",
