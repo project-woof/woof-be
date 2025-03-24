@@ -124,8 +124,7 @@ async function handleCheckProfile(
     return new Response(
       JSON.stringify({
         exists: !!user,
-        // Map is_petsitter to userType for backward compatibility
-        userType: user ? (user.is_petsitter === 1 ? 'both' : 'petowner') : null,
+        is_petsitter: user ? user.is_petsitter : null,
       }),
       {
         status: 200,
@@ -168,18 +167,15 @@ async function handleCreateProfile(
       });
     }
 
-    // Handle both new format and old format requests
-    let profileData: Partial<UserProfile>;
+    // Process profile data
+    const profileData = data as Partial<UserProfile>;
     
-    // Check if this is using the old format (from signup flow)
-    if ('userType' in data && 'name' in data && 'email' in data) {
-      const oldData = data as { email: string; name: string; picture?: string; userType: 'petowner' | 'both' };
-      
-      // Check if user already exists
+    // Check if user already exists
+    if (profileData.email) {
       const existingUser = await env.PETSITTER_DB.prepare(
         "SELECT * FROM user WHERE email = ?"
       )
-        .bind(oldData.email)
+        .bind(profileData.email)
         .first();
 
       if (existingUser) {
@@ -190,36 +186,6 @@ async function handleCreateProfile(
             headers: corsHeaders,
           }
         );
-      }
-      
-      // Convert old format to new format
-      profileData = {
-        username: oldData.name,
-        email: oldData.email,
-        profile_image_url: oldData.picture,
-        is_petsitter: oldData.userType === 'both' ? 1 : 0
-      };
-    } else {
-      // New format
-      profileData = data as Partial<UserProfile>;
-      
-      // Check if user already exists
-      if (profileData.email) {
-        const existingUser = await env.PETSITTER_DB.prepare(
-          "SELECT * FROM user WHERE email = ?"
-        )
-          .bind(profileData.email)
-          .first();
-
-        if (existingUser) {
-          return new Response(
-            JSON.stringify({ error: "User already exists" }),
-            {
-              status: 409,
-              headers: corsHeaders,
-            }
-          );
-        }
       }
     }
 
@@ -276,14 +242,11 @@ async function handleCreateProfile(
       }
     }
 
-    // For backward compatibility with signup flow
     const responseData = {
       message: "Profile created successfully",
       user_id: userId,
       user: {
-        ...newUser,
-        // Include userType for backward compatibility
-        userType: newUser.is_petsitter === 1 ? 'both' : 'petowner'
+        ...newUser
       }
     };
 
@@ -390,21 +353,8 @@ async function handleUpdateProfile(
       });
     }
 
-    // Handle both new format and old format requests
-    let profileData: Partial<UserProfile>;
-    
-    // Check if this is using the old format (from signup flow)
-    if ('userType' in data) {
-      const oldData = data as { userType: 'petowner' | 'both' };
-      
-      // Convert old format to new format
-      profileData = {
-        is_petsitter: oldData.userType === 'both' ? 1 : 0
-      };
-    } else {
-      // New format
-      profileData = data as Partial<UserProfile>;
-    }
+    // Process profile data
+    const profileData = data as Partial<UserProfile>;
 
     // Build dynamic update SQL based on provided fields
     const fieldUpdates = [];
