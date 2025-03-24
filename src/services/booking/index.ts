@@ -84,11 +84,13 @@ async function getBookingsByUserId(env: Env,  userId: string, limit: number, off
     SELECT 
       (CASE WHEN EXISTS (SELECT 1 FROM user WHERE user_id = ?) THEN 1 ELSE 0 END) AS user_exists,
       COUNT(*) OVER () AS total,
-      booking.*
+      booking.*,
+      user.profile_image_url
     FROM booking
-    WHERE petowner_id = ? 
-    ORDER BY created_at DESC 
-    LIMIT ? OFFSET ?
+    JOIN user ON booking.petsitter_id = user.user_id
+    WHERE booking.petowner_id = ? 
+    ORDER BY booking.created_at DESC 
+    LIMIT ? OFFSET ?;
   `).bind(userId, userId, limit, offset).all();
 
   // If no user exists, return 404
