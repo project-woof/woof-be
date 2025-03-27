@@ -1,6 +1,15 @@
-import { handleRequest } from "./routes/routes";
+/// <reference types="@cloudflare/workers-types" />
 
-addEventListener("fetch", (event: FetchEvent) => {
-	const env = event.target as unknown as Env;
-	event.respondWith(handleRequest(event.request, env));
-});
+import { handleRequest } from "@/routes/routes";
+import { serverAuth } from "@/utils/auth";
+
+export default {
+	async fetch(
+		request: Request,
+		env: Env,
+		ctx: ExecutionContext
+	): Promise<Response> {
+		const auth = serverAuth(env);
+		return handleRequest(request, env, auth);
+	},
+};

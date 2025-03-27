@@ -6,25 +6,39 @@ import { bookingHandler } from "@/features/booking/bookingHandler";
 import { profileHandler } from "@/features/profile/profileHandler";
 import { reviewHandler } from "@/features/review/reviewHandler";
 import { notificationHandler } from "@/features/notification/notificationHandler";
+import { authMiddleware } from "@/middleware/authMiddleware";
+import { protectedRoutes } from "./protected";
+import { betterAuth } from "better-auth";
 
 export const handleRequest = async (
 	request: Request,
-	env: Env
+	env: Env,
+	auth: ReturnType<typeof betterAuth>
 ): Promise<Response> => {
 	const url = new URL(request.url);
+
+	const isProtectedRoute = protectedRoutes.some(
+		(route) =>
+			url.pathname.startsWith(route.path) && request.method === route.method
+	);
+
+	let response: Response;
+
+	if (isProtectedRoute) {
+		const authResponse = await authMiddleware(request, auth, env);
+		if (authResponse) {
+			return authResponse;
+		}
+	}
 
 	const corsResponse = handleCORS(request);
 	if (corsResponse.status === 204) {
 		return corsResponse;
 	}
 
-	let response: Response;
-
-	if (url.pathname === "/health") {
+	if (url.pathname.startsWith("/health")) {
 		response = await healthCheck(env);
-	}
-
-	if (url.pathname.startsWith("/auth")) {
+	} else if (url.pathname.startsWith("/auth")) {
 		response = await authHandler(request, env);
 	} else if (url.pathname.startsWith("/chat")) {
 		response = await chatHandler(request, env);

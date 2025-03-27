@@ -23,5 +23,9 @@ export const authHandler = async (
 		return new Response("Invalid credentials", { status: 401 });
 	}
 
+	if (url.pathname === "/auth/logout" && request.method === "POST") {
+		return new Response("Logout successful", { status: 200 });
+	}
+
 	return new Response("Not Found", { status: 404 });
 };

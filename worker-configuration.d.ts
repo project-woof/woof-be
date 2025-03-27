@@ -3,6 +3,9 @@ declare namespace Cloudflare {
 	interface Env {
 		PETSITTER_DB: D1Database;
 		PETSITTER_R2: R2Bucket;
+		BETTER_AUTH_URL: string;
+		GOOGLE_CLIENT_ID: string;
+		GOOGLE_CLIENT_SECRET: string;
 	}
 }
 interface Env extends Cloudflare.Env {}

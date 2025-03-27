@@ -1,4 +1,3 @@
-// src/features/booking/bookingHandler.ts
 import { bookingService } from "./bookingService";
 
 export const bookingHandler = async (

@@ -1,7 +1,7 @@
 import { d1Service } from "@/services/d1Service";
 
 export const authService = {
-	createUser: async (
+	signUpUser: async (
 		username: string,
 		passwordHash: string,
 		env: Env
