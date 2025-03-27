@@ -1,3 +1,6 @@
-import { v7 as uuidv7 } from 'uuid';
+import { v7 as uuidv7 } from "uuid";
 
-export const generateUUID = uuidv7;
+export const generateUUID = (parameter: string): string => {
+	const generatedUUID = uuidv7().replace(/-/g, "");
+	return `${parameter}_${generatedUUID};`;
+};

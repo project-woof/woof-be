@@ -36,7 +36,7 @@ export const bookingService = {
 
 	// Create a new booking
 	createBooking: async (body: any, env: Env): Promise<any> => {
-		const booking_id = generateUUID();
+		const booking_id = generateUUID("booking");
 		const { petowner_id, petsitter_id, start_date, end_date } = body;
 		const query = `
 		INSERT INTO booking (booking_id, petowner_id, petsitter_id, start_date, end_date)

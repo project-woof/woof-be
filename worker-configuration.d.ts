@@ -2,6 +2,7 @@
 declare namespace Cloudflare {
 	interface Env {
 		PETSITTER_DB: D1Database;
+		PETSITTER_R2: R2Bucket;
 	}
 }
 interface Env extends Cloudflare.Env {}
