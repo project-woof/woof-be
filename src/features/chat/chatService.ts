@@ -1,4 +1,4 @@
-import { d1Service } from '@/services/d1Service';
+import { d1Service } from "@/services/d1Service";
 
 export const chatService = {
 	createChatRoom: async (roomName: string, env: Env): Promise<any> => {
@@ -11,13 +11,18 @@ export const chatService = {
 		return await d1Service.executeQuery(query, [], env);
 	},
 
-	addMessageToChatRoom: async (roomId: string, userId: string, message: string, env: Env): Promise<boolean> => {
+	addMessageToChatRoom: async (
+		roomId: string,
+		userId: string,
+		message: string,
+		env: Env
+	): Promise<boolean> => {
 		const query = `INSERT INTO messages (room_id, user_id, message) VALUES (?, ?, ?);`;
 		try {
 			await d1Service.executeQuery(query, [roomId, userId, message], env);
 			return true;
 		} catch (error) {
-			console.error('Error adding message:', error);
+			console.error("Error adding message:", error);
 			return false;
 		}
 	},
