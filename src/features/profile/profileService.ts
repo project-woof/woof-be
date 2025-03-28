@@ -5,7 +5,7 @@ import type { UserProfile } from "@/types/profileTypes";
 export const profileService = {
 	// Get a profile by user ID
 	getProfileById: async (userId: string, env: Env): Promise<any | null> => {
-		const query = "SELECT * FROM profiles WHERE user_id = ?";
+		const query = "SELECT * FROM user WHERE user_id = ?";
 		const result = await d1Service.executeQuery<any>(query, [userId], env);
 		return result.length > 0 ? result[0] : null;
 	},
@@ -30,7 +30,7 @@ export const profileService = {
 		}
 
 		const query = `
-      INSERT INTO profiles 
+      INSERT INTO user 
         (user_id, username, email, profile_image_url, latitude, longitude, description, is_petsitter)
       VALUES 
         (?, ?, ?, ?, ?, ?, ?, ?)
@@ -53,7 +53,7 @@ export const profileService = {
 		// If the database returns a last_row_id, fetch the newly inserted profile.
 		if (result.last_row_id) {
 			const inserted = await d1Service.executeQuery(
-				"SELECT * FROM profiles WHERE rowid = ?",
+				"SELECT * FROM user WHERE rowid = ?",
 				[result.last_row_id],
 				env
 			);
@@ -100,7 +100,7 @@ export const profileService = {
 		}
 		if (fields.length === 0) return false;
 		values.push(userId);
-		const query = `UPDATE profiles SET ${fields.join(
+		const query = `UPDATE user SET ${fields.join(
 			", "
 		)}, last_updated = CURRENT_TIMESTAMP WHERE user_id = ?`;
 		try {
@@ -114,7 +114,7 @@ export const profileService = {
 
 	// Delete a profile by user ID
 	deleteProfile: async (userId: string, env: Env): Promise<any> => {
-		const query = "DELETE FROM profiles WHERE user_id = ?";
+		const query = "DELETE FROM user WHERE user_id = ?";
 		return await d1Service.executeQuery(query, [userId], env);
 	},
 };
