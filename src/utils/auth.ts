@@ -18,6 +18,8 @@ export function serverAuth(env: Env) {
 					id: "user_id",
 					name: "username",
 					image: "profile_image_url",
+					createdAt: "created_at",
+					updatedAt: "last_updated",
 				},
 			},
 			baseURL: env.BETTER_AUTH_URL,

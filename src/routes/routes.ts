@@ -38,7 +38,6 @@ export const handleRequest = async (
 	if (url.pathname.startsWith("/health")) {
 		response = await healthCheck(env);
 	} else if (url.pathname.startsWith("/api/auth")) {
-		console.log("auth handler called");
 		response = await auth.handler(request);
 	} else if (url.pathname.startsWith("/chat")) {
 		response = await chatHandler(request, env);
