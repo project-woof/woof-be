@@ -33,6 +33,7 @@ export const handleCORS = (
 	);
 	headers.set("Access-Control-Allow-Methods", allowedMethods.join(", "));
 	headers.set("Access-Control-Allow-Headers", allowedHeaders.join(", "));
+	headers.set("Access-Control-Allow-Credentials", "true");
 
 	if (request.method === "OPTIONS") {
 		return new Response(null, {
