@@ -12,6 +12,14 @@ export function serverAuth(env: Env) {
 				}),
 				type: "sqlite",
 			},
+			user: {
+				modelName: "user",
+				fields: {
+					id: "user_id",
+					name: "username",
+					image: "profile_image_url",
+				},
+			},
 			baseURL: env.BETTER_AUTH_URL,
 			socialProviders: {
 				google: {
