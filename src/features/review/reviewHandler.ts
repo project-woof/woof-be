@@ -8,7 +8,10 @@ export const reviewHandler = async (
 	const url = new URL(request.url);
 
 	// Get review by review_id
-	if (url.pathname === "/review/getReview" && request.method === "GET") {
+	if (
+		url.pathname.startsWith("/review/getReview") &&
+		request.method === "GET"
+	) {
 		// Assuming the review ID is the last segment in the pathname
 		const reviewId = url.pathname.split("/").pop();
 		if (!reviewId) {
