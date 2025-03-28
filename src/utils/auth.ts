@@ -17,7 +17,6 @@ export function serverAuth(env: Env) {
 				google: {
 					clientId: env.GOOGLE_CLIENT_ID!,
 					clientSecret: env.GOOGLE_CLIENT_SECRET!,
-					redirectURI: `${env.BETTER_AUTH_URL}/api/auth/callback/google`!,
 				},
 			},
 			plugins: [jwt(), bearer()],

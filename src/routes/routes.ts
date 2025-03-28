@@ -16,6 +16,11 @@ export const handleRequest = async (
 ): Promise<Response> => {
 	const url = new URL(request.url);
 
+	const corsResponse = handleCORS(request);
+	if (corsResponse.status === 204) {
+		return corsResponse;
+	}
+
 	const isProtectedRoute = protectedRoutes.some(
 		(route) =>
 			url.pathname.startsWith(route.path) && request.method === route.method
@@ -30,13 +35,10 @@ export const handleRequest = async (
 		}
 	}
 
-	const corsResponse = handleCORS(request);
-	if (corsResponse.status === 204) {
-		return corsResponse;
-	}
-
 	if (url.pathname.startsWith("/health")) {
 		response = await healthCheck(env);
+	} else if (url.pathname.startsWith("/api/auth")) {
+		response = await auth.handler(request);
 	} else if (url.pathname.startsWith("/chat")) {
 		response = await chatHandler(request, env);
 	} else if (url.pathname.startsWith("/booking")) {

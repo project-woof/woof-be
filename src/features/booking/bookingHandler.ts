@@ -7,7 +7,10 @@ export const bookingHandler = async (
 	const url = new URL(request.url);
 
 	// Get booking by booking_id
-	if (url.pathname === "/booking/getBooking" && request.method === "GET") {
+	if (
+		url.pathname.startsWith("/booking/getBooking") &&
+		request.method === "GET"
+	) {
 		const bookingId = url.pathname.split("/").pop();
 		if (!bookingId) {
 			return new Response("Booking ID is required", { status: 400 });
@@ -20,7 +23,10 @@ export const bookingHandler = async (
 	}
 
 	// Get all bookings by user_id with pagination
-	if (url.pathname === "/booking/getBookings" && request.method === "GET") {
+	if (
+		url.pathname.startsWith("/booking/getBookings") &&
+		request.method === "GET"
+	) {
 		const userId = url.searchParams.get("user-id");
 		if (!userId) {
 			return new Response("Unauthorized", { status: 401 });
@@ -52,7 +58,10 @@ export const bookingHandler = async (
 	}
 
 	// Create a new booking
-	if (url.pathname === "/booking/createBooking" && request.method === "POST") {
+	if (
+		url.pathname.startsWith("/booking/createBooking") &&
+		request.method === "POST"
+	) {
 		try {
 			const body = await request.json();
 			const booking = await bookingService.createBooking(body, env);
@@ -79,7 +88,7 @@ export const bookingHandler = async (
 
 	// Delete a booking
 	if (
-		url.pathname === "/booking/deleteBooking" &&
+		url.pathname.startsWith("/booking/deleteBooking") &&
 		request.method === "DELETE"
 	) {
 		const bookingId = url.pathname.split("/").pop();
