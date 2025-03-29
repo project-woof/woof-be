@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { D1Dialect } from "kysely-d1";
+import { customSession } from "better-auth/plugins";
 
 let auth: ReturnType<typeof betterAuth>;
 export function serverAuth(env: Env) {
@@ -37,6 +38,12 @@ export function serverAuth(env: Env) {
 						required: false,
 						default: 0,
 					},
+				},
+			},
+			session: {
+				cookieCache: {
+					enabled: true,
+					maxAge: 24 * 60 * 60, // Cache duration in seconds
 				},
 			},
 			baseURL: env.BETTER_AUTH_URL,

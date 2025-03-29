@@ -40,7 +40,7 @@ export const bookingService = {
 		const { petowner_id, petsitter_id, start_date, end_date } = body;
 		const query = `
 		INSERT INTO booking (booking_id, petowner_id, petsitter_id, start_date, end_date)
-		VALUES (?, ?, ?, ?, ?);`;
+		VALUES (?, ?, ?, ?, ?) RETURNING *;`;
 		try {
 			return await d1Service.executeQuery(
 				query,

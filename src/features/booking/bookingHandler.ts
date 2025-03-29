@@ -65,7 +65,7 @@ export const bookingHandler = async (
 		try {
 			const body = await request.json();
 			const booking = await bookingService.createBooking(body, env);
-			if (booking.length === 0) {
+			if (booking[0].changes === 0) {
 				return new Response("Booking Not Created", { status: 400 });
 			}
 			return new Response(JSON.stringify(booking), { status: 201 });
@@ -96,7 +96,7 @@ export const bookingHandler = async (
 			return new Response("Booking ID is required", { status: 400 });
 		}
 		const booking = await bookingService.deleteBooking(bookingId, env);
-		if (booking[0].changes === 0) {
+		if (booking.length === 0) {
 			return new Response("Booking Not Found", { status: 404 });
 		}
 		return new Response(JSON.stringify(booking), { status: 200 });
