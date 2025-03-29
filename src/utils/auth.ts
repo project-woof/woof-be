@@ -21,6 +21,24 @@ export function serverAuth(env: Env) {
 					createdAt: "created_at",
 					updatedAt: "last_updated",
 				},
+				additionalFields: {
+					latitude: {
+						type: "number",
+						required: false,
+					},
+					longitude: {
+						type: "number",
+						required: false,
+					},
+					description: {
+						type: "string",
+						required: false,
+					},
+					is_petsitter: {
+						type: "number",
+						required: false,
+						default: 0,
+				}
 			},
 			baseURL: env.BETTER_AUTH_URL,
 			socialProviders: {
