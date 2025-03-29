@@ -38,7 +38,8 @@ export function serverAuth(env: Env) {
 						type: "number",
 						required: false,
 						default: 0,
-				}
+					},
+				},
 			},
 			baseURL: env.BETTER_AUTH_URL,
 			socialProviders: {
