@@ -1,6 +1,5 @@
 import { betterAuth } from "better-auth";
 import { D1Dialect } from "kysely-d1";
-// import { jwt, bearer } from "better-auth/plugins";
 
 let auth: ReturnType<typeof betterAuth>;
 export function serverAuth(env: Env) {
@@ -47,7 +46,6 @@ export function serverAuth(env: Env) {
 					clientSecret: env.GOOGLE_CLIENT_SECRET!,
 				},
 			},
-			// plugins: [jwt(), bearer()],
 		});
 	}
 	return auth;
