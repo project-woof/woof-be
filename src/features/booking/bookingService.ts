@@ -17,13 +17,13 @@ export const bookingService = {
 	): Promise<any[]> => {
 		const query = `
 		SELECT 
-			(CASE WHEN EXISTS (SELECT 1 FROM user WHERE user_id = ?) THEN 1 ELSE 0 END) AS user_exists,
+			(CASE WHEN EXISTS (SELECT 1 FROM user WHERE id = ?) THEN 1 ELSE 0 END) AS user_exists,
 			COUNT(*) OVER () AS total,
 			booking.*,
 			user.profile_image_url,
 			user.username
 		FROM booking
-		JOIN user ON booking.petsitter_id = user.user_id
+		JOIN user ON booking.petowner_id = user.id
 		WHERE booking.petowner_id = ? 
 		ORDER BY booking.created_at DESC 
 		LIMIT ? OFFSET ?;`;

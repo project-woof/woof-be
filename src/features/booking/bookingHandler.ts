@@ -8,7 +8,7 @@ export const bookingHandler = async (
 
 	// Get booking by booking_id
 	if (
-		url.pathname.startsWith("/booking/getBooking") &&
+		url.pathname.startsWith("/booking/getBooking/") &&
 		request.method === "GET"
 	) {
 		const bookingId = url.pathname.split("/").pop();
@@ -65,10 +65,10 @@ export const bookingHandler = async (
 		try {
 			const body = await request.json();
 			const booking = await bookingService.createBooking(body, env);
-			if (booking[0].changes === 0) {
+			if (booking.length === 0) {
 				return new Response("Booking Not Created", { status: 400 });
 			}
-			return new Response(JSON.stringify(booking), { status: 201 });
+			return new Response(JSON.stringify(booking[0]), { status: 201 });
 		} catch (error: unknown) {
 			console.error("Error creating booking:", error);
 			if (error instanceof Error) {
@@ -88,7 +88,7 @@ export const bookingHandler = async (
 
 	// Delete a booking
 	if (
-		url.pathname.startsWith("/booking/deleteBooking") &&
+		url.pathname.startsWith("/booking/deleteBooking/") &&
 		request.method === "DELETE"
 	) {
 		const bookingId = url.pathname.split("/").pop();
