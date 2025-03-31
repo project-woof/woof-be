@@ -44,6 +44,7 @@ export function serverAuth(env: Env) {
 				google: {
 					clientId: env.GOOGLE_CLIENT_ID!,
 					clientSecret: env.GOOGLE_CLIENT_SECRET!,
+					redirectURI: "https://woof-fe.pages.dev/api/auth/callback/google",
 				},
 			},
 		});
