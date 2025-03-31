@@ -30,9 +30,9 @@ export const reviewHandler = async (
 		url.pathname.startsWith("/review/getReviews/reviewer") &&
 		request.method === "GET"
 	) {
-		const reviewerId = url.searchParams.get("reviewer-id");
+		const reviewerId = url.searchParams.get("id");
 		if (!reviewerId) {
-			return new Response("Unauthorized", { status: 401 });
+			return new Response("Reviewer Not Found", { status: 404 });
 		}
 		const limit = parseInt(url.searchParams.get("limit") || "10");
 		const offset = parseInt(url.searchParams.get("offset") || "0");
@@ -42,23 +42,7 @@ export const reviewHandler = async (
 			offset,
 			env
 		);
-		if (reviews.length === 0) {
-			return new Response("Reviewer Not Found", { status: 404 });
-		}
-		// Assuming the first item contains the total count via the alias "total"
-		const total = reviews.length > 0 ? (reviews[0].total as number) : 0;
-		return new Response(
-			JSON.stringify({
-				reviews: reviews.map(({ total, user_exists, ...review }) => review),
-				pagination: {
-					total,
-					limit,
-					offset,
-					hasMore: offset + reviews.length < total,
-				},
-			}),
-			{ status: 200 }
-		);
+		return new Response(JSON.stringify(reviews), { status: 200 });
 	}
 
 	// Get all reviews by reviewer_id with pagination
@@ -66,9 +50,9 @@ export const reviewHandler = async (
 		url.pathname.startsWith("/review/getReviews/reviewee") &&
 		request.method === "GET"
 	) {
-		const revieweeId = url.searchParams.get("reviewee-id");
+		const revieweeId = url.searchParams.get("id");
 		if (!revieweeId) {
-			return new Response("Unauthorized", { status: 401 });
+			return new Response("Reviewee Not Found", { status: 404 });
 		}
 		const limit = parseInt(url.searchParams.get("limit") || "10");
 		const offset = parseInt(url.searchParams.get("offset") || "0");
@@ -78,23 +62,7 @@ export const reviewHandler = async (
 			offset,
 			env
 		);
-		if (reviews.length === 0) {
-			return new Response("Reviewee Not Found", { status: 404 });
-		}
-		// Assuming the first item contains the total count via the alias "total"
-		const total = reviews.length > 0 ? (reviews[0].total as number) : 0;
-		return new Response(
-			JSON.stringify({
-				reviews: reviews.map(({ total, user_exists, ...review }) => review),
-				pagination: {
-					total,
-					limit,
-					offset,
-					hasMore: offset + reviews.length < total,
-				},
-			}),
-			{ status: 200 }
-		);
+		return new Response(JSON.stringify(reviews), { status: 200 });
 	}
 
 	// Create a new review

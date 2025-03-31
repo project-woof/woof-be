@@ -10,7 +10,7 @@ export const bookingService = {
 
 	// Get all bookings by petowner_id with pagination
 	getBookingsByPetownerId: async (
-		userId: string,
+		petowner_id: string,
 		limit: number,
 		offset: number,
 		env: Env
@@ -25,12 +25,16 @@ export const bookingService = {
 		  WHERE booking.petowner_id = ?
 		  ORDER BY booking.created_at DESC 
 		  LIMIT ? OFFSET ?;`;
-		return await d1Service.executeQuery(query, [userId, limit, offset], env);
+		return await d1Service.executeQuery(
+			query,
+			[petowner_id, limit, offset],
+			env
+		);
 	},
 
 	// Get all bookings by petowner_id with pagination
 	getBookingsByPetsitterId: async (
-		userId: string,
+		petsitter_id: string,
 		limit: number,
 		offset: number,
 		env: Env
@@ -45,7 +49,11 @@ export const bookingService = {
 		  WHERE booking.petsitter_id = ?
 		  ORDER BY booking.created_at DESC 
 		  LIMIT ? OFFSET ?;`;
-		return await d1Service.executeQuery(query, [userId, limit, offset], env);
+		return await d1Service.executeQuery(
+			query,
+			[petsitter_id, limit, offset],
+			env
+		);
 	},
 
 	// Create a new booking

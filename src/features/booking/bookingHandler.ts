@@ -27,14 +27,14 @@ export const bookingHandler = async (
 		url.pathname.startsWith("/booking/getBookings/petowner") &&
 		request.method === "GET"
 	) {
-		const userId = url.searchParams.get("id");
-		if (!userId) {
-			return new Response("User Not Found", { status: 404 });
+		const petownerId = url.searchParams.get("id");
+		if (!petownerId) {
+			return new Response("Petowner Not Found", { status: 404 });
 		}
 		const limit = parseInt(url.searchParams.get("limit") || "10");
 		const offset = parseInt(url.searchParams.get("offset") || "0");
 		const bookings = await bookingService.getBookingsByPetownerId(
-			userId,
+			petownerId,
 			limit,
 			offset,
 			env
@@ -47,14 +47,14 @@ export const bookingHandler = async (
 		url.pathname.startsWith("/booking/getBookings/petsitter") &&
 		request.method === "GET"
 	) {
-		const userId = url.searchParams.get("id");
-		if (!userId) {
-			return new Response("User Not Found", { status: 404 });
+		const petsitterId = url.searchParams.get("id");
+		if (!petsitterId) {
+			return new Response("Petsitter Not Found", { status: 404 });
 		}
 		const limit = parseInt(url.searchParams.get("limit") || "10");
 		const offset = parseInt(url.searchParams.get("offset") || "0");
 		const bookings = await bookingService.getBookingsByPetsitterId(
-			userId,
+			petsitterId,
 			limit,
 			offset,
 			env
