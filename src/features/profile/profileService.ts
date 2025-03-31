@@ -5,7 +5,7 @@ import type { UserProfile } from "@/types/profileTypes";
 export const profileService = {
 	// Get a profile by user ID
 	getProfileById: async (userId: string, env: Env): Promise<any | null> => {
-		const query = "SELECT * FROM user WHERE user_id = ?";
+		const query = "SELECT * FROM user WHERE id = ?";
 		return await d1Service.executeQuery<any>(query, [userId], env);
 	},
 
