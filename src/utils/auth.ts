@@ -45,6 +45,13 @@ export function serverAuth(env: Env) {
 					maxAge: 24 * 60 * 60, // Cache duration in seconds
 				},
 			},
+			advanced: {
+				defaultCookieAttributes: {
+					sameSite: "none",
+					secure: true,
+					partitioned: true, // New browser standards will mandate this for foreign cookies
+				},
+			},
 			baseURL: env.BETTER_AUTH_URL,
 			socialProviders: {
 				google: {

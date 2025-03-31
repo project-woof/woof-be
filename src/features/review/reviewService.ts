@@ -41,17 +41,15 @@ export const reviewService = {
 		offset: number,
 		env: Env
 	): Promise<Review[]> => {
-		const query = `
-      SELECT 
-        review.*,
-        user.profile_image_url,
-        user.username
-      FROM review
-      JOIN user ON review.reviewer_id = user.id
-      WHERE review.reviewee_id = ? 
-      ORDER BY review.created_at DESC 
-      LIMIT ? OFFSET ?;
-    `;
+		const query = `SELECT 
+						review.*,
+						user.profile_image_url,
+						user.username
+					FROM review
+					JOIN user ON review.reviewer_id = user.id
+					WHERE review.reviewee_id = ? 
+					ORDER BY review.created_at DESC 
+					LIMIT ? OFFSET ?;`;
 		return await d1Service.executeQuery<Review>(
 			query,
 			[revieweeId, limit, offset],
