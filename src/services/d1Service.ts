@@ -17,12 +17,7 @@ export const d1Service = {
 			const result = await env.PETSITTER_DB.prepare(query)
 				.bind(...params)
 				.run();
-			const results = {
-				changes: result.meta.changes,
-				last_row_id: result.meta.last_row_id,
-			};
-
-			return [results] as T[];
+			return result.results as T[];
 		} catch (error) {
 			console.error("Error executing query:", error);
 			throw new Error("Database query failed");

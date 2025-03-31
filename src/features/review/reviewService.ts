@@ -18,13 +18,13 @@ export const reviewService = {
 	): Promise<any[]> => {
 		const query = `
       SELECT 
-        (CASE WHEN EXISTS (SELECT 1 FROM user WHERE user_id = ?) THEN 1 ELSE 0 END) AS user_exists,
+        (CASE WHEN EXISTS (SELECT 1 FROM user WHERE id = ?) THEN 1 ELSE 0 END) AS user_exists,
         COUNT(*) OVER () AS total,
         review.*,
         user.profile_image_url,
         user.username
       FROM review
-      JOIN user ON review.reviewer_id = user.user_id
+      JOIN user ON review.reviewer_id = user.id
       WHERE review.reviewer_id = ? 
       ORDER BY review.created_at DESC 
       LIMIT ? OFFSET ?;
@@ -45,13 +45,13 @@ export const reviewService = {
 	): Promise<any[]> => {
 		const query = `
       SELECT 
-        (CASE WHEN EXISTS (SELECT 1 FROM user WHERE user_id = ?) THEN 1 ELSE 0 END) AS user_exists,
+        (CASE WHEN EXISTS (SELECT 1 FROM user WHERE id = ?) THEN 1 ELSE 0 END) AS user_exists,
         COUNT(*) OVER () AS total,
         review.*,
         user.profile_image_url,
         user.username
       FROM review
-      JOIN user ON review.reviewee_id = user.user_id
+      JOIN user ON review.reviewee_id = user.id
       WHERE review.reviewee_id = ? 
       ORDER BY review.created_at DESC 
       LIMIT ? OFFSET ?;
@@ -69,7 +69,7 @@ export const reviewService = {
 		const { reviewer_id, reviewee_id, rating, comment } = body;
 		const query = `
       INSERT INTO review (review_id, reviewer_id, reviewee_id, rating, comment, created_at, last_updated)
-      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *;
     `;
 		try {
 			return await d1Service.executeQuery(

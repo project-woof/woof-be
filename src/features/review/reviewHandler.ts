@@ -9,7 +9,7 @@ export const reviewHandler = async (
 
 	// Get review by review_id
 	if (
-		url.pathname.startsWith("/review/getReview") &&
+		url.pathname.startsWith("/review/getReview/") &&
 		request.method === "GET"
 	) {
 		// Assuming the review ID is the last segment in the pathname
@@ -27,7 +27,7 @@ export const reviewHandler = async (
 
 	// Get all reviews by reviewer_id with pagination
 	if (
-		url.pathname === "/review/getReviews/reviewer" &&
+		url.pathname.startsWith("/review/getReviews/reviewer") &&
 		request.method === "GET"
 	) {
 		const reviewerId = url.searchParams.get("reviewer-id");
@@ -42,7 +42,7 @@ export const reviewHandler = async (
 			offset,
 			env
 		);
-		if (Array.isArray(reviews) && reviews.length === 0) {
+		if (reviews.length === 0) {
 			return new Response("Reviewer Not Found", { status: 404 });
 		}
 		// Assuming the first item contains the total count via the alias "total"
@@ -63,7 +63,7 @@ export const reviewHandler = async (
 
 	// Get all reviews by reviewer_id with pagination
 	if (
-		url.pathname === "/review/getReviews/reviewee" &&
+		url.pathname.startsWith("/review/getReviews/reviewee") &&
 		request.method === "GET"
 	) {
 		const revieweeId = url.searchParams.get("reviewee-id");
@@ -78,8 +78,8 @@ export const reviewHandler = async (
 			offset,
 			env
 		);
-		if (Array.isArray(reviews) && reviews.length === 0) {
-			return new Response("Reviewer Not Found", { status: 404 });
+		if (reviews.length === 0) {
+			return new Response("Reviewee Not Found", { status: 404 });
 		}
 		// Assuming the first item contains the total count via the alias "total"
 		const total = reviews.length > 0 ? (reviews[0].total as number) : 0;
@@ -103,10 +103,10 @@ export const reviewHandler = async (
 			const body = await request.json();
 			const review = await reviewService.createReview(body, env);
 			// Expect non-select query result to contain meta info in the first element
-			if (Array.isArray(review) && review.length === 0) {
+			if (review.length === 0) {
 				return new Response("Review Not Created", { status: 400 });
 			}
-			return new Response(JSON.stringify(review), { status: 201 });
+			return new Response(JSON.stringify(review[0]), { status: 201 });
 		} catch (error: unknown) {
 			console.error("Error creating review:", error);
 			if (error instanceof Error) {
@@ -140,7 +140,7 @@ export const reviewHandler = async (
 	}
 
 	// Delete a review
-	if (url.pathname === "/review/deleteReview" && request.method === "DELETE") {
+	if (url.pathname === "/review/deleteReview/" && request.method === "DELETE") {
 		const reviewId = url.pathname.split("/").pop();
 		if (!reviewId) {
 			return new Response("Review ID is required", { status: 400 });

@@ -10,6 +10,7 @@ export const profileService = {
 		return result.length > 0 ? result[0] : null;
 	},
 
+	// TODO: Replace with createPetsitter (auth handles user creation)
 	// Create a new profile
 	createProfile: async (body: any, env: Env): Promise<any | null> => {
 		const user_id = generateUUID("user");
@@ -30,36 +31,30 @@ export const profileService = {
 		}
 
 		const query = `
-      INSERT INTO user 
-        (user_id, username, email, profile_image_url, latitude, longitude, description, is_petsitter)
-      VALUES 
-        (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-		const result = (await d1Service.executeQuery(
-			query,
-			[
-				user_id,
-				username,
-				email,
-				profile_image_url || null,
-				latitude || null,
-				longitude || null,
-				description || null,
-				is_petsitter || 0,
-			],
-			env
-		)) as { last_row_id?: number };
-
-		// If the database returns a last_row_id, fetch the newly inserted profile.
-		if (result.last_row_id) {
-			const inserted = await d1Service.executeQuery(
-				"SELECT * FROM user WHERE rowid = ?",
-				[result.last_row_id],
+			INSERT INTO user 
+				(user_id, username, email, profile_image_url, latitude, longitude, description, is_petsitter)
+			VALUES 
+				(?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;
+			`;
+		try {
+			return await d1Service.executeQuery(
+				query,
+				[
+					user_id,
+					username,
+					email,
+					profile_image_url || null,
+					latitude || null,
+					longitude || null,
+					description || null,
+					is_petsitter || 0,
+				],
 				env
 			);
-			return inserted.length > 0 ? inserted[0] : null;
+		} catch (error) {
+			console.error("Error inserting profile:", error);
+			throw error;
 		}
-		return null;
 	},
 
 	// Update an existing profile (partial update)

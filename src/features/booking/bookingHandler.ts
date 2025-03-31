@@ -8,7 +8,7 @@ export const bookingHandler = async (
 
 	// Get booking by booking_id
 	if (
-		url.pathname.startsWith("/booking/getBooking") &&
+		url.pathname.startsWith("/booking/getBooking/") &&
 		request.method === "GET"
 	) {
 		const bookingId = url.pathname.split("/").pop();
@@ -22,39 +22,44 @@ export const bookingHandler = async (
 		return new Response(JSON.stringify(booking), { status: 200 });
 	}
 
-	// Get all bookings by user_id with pagination
+	// Get all bookings by petowner_id with pagination
 	if (
-		url.pathname.startsWith("/booking/getBookings") &&
+		url.pathname.startsWith("/booking/getBookings/petowner") &&
 		request.method === "GET"
 	) {
-		const userId = url.searchParams.get("user-id");
+		const userId = url.searchParams.get("id");
 		if (!userId) {
-			return new Response("Unauthorized", { status: 401 });
+			return new Response("User Not Found", { status: 404 });
 		}
 		const limit = parseInt(url.searchParams.get("limit") || "10");
 		const offset = parseInt(url.searchParams.get("offset") || "0");
-		const bookings = await bookingService.getBookingsByUserId(
+		const bookings = await bookingService.getBookingsByPetownerId(
 			userId,
 			limit,
 			offset,
 			env
 		);
-		if (bookings.length === 0) {
+		return new Response(JSON.stringify(bookings), { status: 200 });
+	}
+
+	// Get all bookings by petowner_id with pagination
+	if (
+		url.pathname.startsWith("/booking/getBookings/petsitter") &&
+		request.method === "GET"
+	) {
+		const userId = url.searchParams.get("id");
+		if (!userId) {
 			return new Response("User Not Found", { status: 404 });
 		}
-		const total = bookings.length > 0 ? (bookings[0].total as number) : 0;
-		return new Response(
-			JSON.stringify({
-				bookings: bookings.map(({ total, user_exists, ...booking }) => booking),
-				pagination: {
-					total,
-					limit,
-					offset,
-					hasMore: offset + bookings.length < total,
-				},
-			}),
-			{ status: 200 }
+		const limit = parseInt(url.searchParams.get("limit") || "10");
+		const offset = parseInt(url.searchParams.get("offset") || "0");
+		const bookings = await bookingService.getBookingsByPetsitterId(
+			userId,
+			limit,
+			offset,
+			env
 		);
+		return new Response(JSON.stringify(bookings), { status: 200 });
 	}
 
 	// Create a new booking
@@ -68,7 +73,7 @@ export const bookingHandler = async (
 			if (booking.length === 0) {
 				return new Response("Booking Not Created", { status: 400 });
 			}
-			return new Response(JSON.stringify(booking), { status: 201 });
+			return new Response(JSON.stringify(booking[0]), { status: 201 });
 		} catch (error: unknown) {
 			console.error("Error creating booking:", error);
 			if (error instanceof Error) {
@@ -88,7 +93,7 @@ export const bookingHandler = async (
 
 	// Delete a booking
 	if (
-		url.pathname.startsWith("/booking/deleteBooking") &&
+		url.pathname.startsWith("/booking/deleteBooking/") &&
 		request.method === "DELETE"
 	) {
 		const bookingId = url.pathname.split("/").pop();
@@ -96,7 +101,7 @@ export const bookingHandler = async (
 			return new Response("Booking ID is required", { status: 400 });
 		}
 		const booking = await bookingService.deleteBooking(bookingId, env);
-		if (booking[0].changes === 0) {
+		if (booking.length === 0) {
 			return new Response("Booking Not Found", { status: 404 });
 		}
 		return new Response(JSON.stringify(booking), { status: 200 });

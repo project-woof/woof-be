@@ -8,8 +8,11 @@ export const profileHandler = async (
 	const url = new URL(request.url);
 
 	// GET profile by user ID via query parameter
-	if (url.pathname === "/profile/getProfile" && request.method === "GET") {
-		const userId = url.searchParams.get("id");
+	if (
+		url.pathname.startsWith("/profile/getProfile/") &&
+		request.method === "GET"
+	) {
+		const userId = url.pathname.split("/").pop();
 		if (!userId) {
 			return new Response("User ID is required", { status: 400 });
 		}
@@ -20,15 +23,16 @@ export const profileHandler = async (
 		return new Response(JSON.stringify(profile), { status: 200 });
 	}
 
+	// TODO: Replace with createPetsitter (auth handles user creation)
 	// Create a new profile
 	if (url.pathname === "/profile/createProfile" && request.method === "POST") {
 		try {
 			const body = await request.json();
 			const profile = await profileService.createProfile(body, env);
-			if (!profile) {
+			if (profile.length === 0) {
 				return new Response("Profile not created", { status: 400 });
 			}
-			return new Response(JSON.stringify(profile), { status: 201 });
+			return new Response(JSON.stringify(profile[0]), { status: 201 });
 		} catch (error: unknown) {
 			console.error("Error creating profile:", error);
 			return new Response(
@@ -62,7 +66,7 @@ export const profileHandler = async (
 
 	// Delete a profile by user ID via query parameter (e.g. /profile/deleteProfile?id=USER_ID)
 	if (
-		url.pathname === "/profile/deleteProfile" &&
+		url.pathname === "/profile/deleteProfile/" &&
 		request.method === "DELETE"
 	) {
 		const userId = url.pathname.split("/").pop();
