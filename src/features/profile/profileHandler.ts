@@ -44,7 +44,7 @@ export const profileHandler = async (
 
 	// Get list of petsitters
 	if (
-		url.pathname.startsWith("/profile/getPetsitters") &&
+		url.pathname.startsWith("/profile/getPetsitterList") &&
 		request.method === "GET"
 	) {
 		const { searchParams } = new URL(request.url);
@@ -61,14 +61,8 @@ export const profileHandler = async (
 		const limit = parseInt(searchParams.get("limit") ?? "15", 10);
 		const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
-		if (isNaN(userLat) || isNaN(userLon)) {
-			return new Response("Latitude and longitude are required", {
-				status: 400,
-			});
-		}
-
 		try {
-			const petsitters = await profileService.getPetsittersList(
+			const petsitters = await profileService.getPetsitterList(
 				userLat,
 				userLon,
 				limit,

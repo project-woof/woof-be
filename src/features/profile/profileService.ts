@@ -28,7 +28,7 @@ export const profileService = {
 	},
 
 	// Get a list of petsitter profiles including profile_image with pagination
-	getPetsittersList: async (
+	getPetsitterList: async (
 		userLat: number,
 		userLon: number,
 		limit: number,
@@ -46,8 +46,8 @@ export const profileService = {
 				p.service_tags,
 				pi.image_url AS first_image,
 				sqrt(
-					(u.latitude - :user_lat) * (u.latitude - :user_lat) +
-					(u.longitude - :user_lon) * (u.longitude - :user_lon)
+					(u.latitude - ?) * (u.latitude - ?) +
+					(u.longitude - ?) * (u.longitude - ?)
 				) AS distance,
 				CASE 
 					WHEN p.total_reviews > 0 THEN p.sum_of_rating / p.total_reviews 
@@ -77,15 +77,13 @@ export const profileService = {
 			) AS composite_score
 		FROM petsitters_with_distance
 		ORDER BY composite_score DESC
-		LIMIT :limit OFFSET :offset;
+		LIMIT ? OFFSET ?;
 		`;
-		const params = {
-			user_lat: userLat,
-			user_lon: userLon,
-			limit,
-			offset,
-		};
-		return await d1Service.executeQuery<PetsitterProfile>(query, [params], env);
+		return await d1Service.executeQuery<PetsitterProfile>(
+			query,
+			[userLat, userLat, userLon, userLon, limit, offset],
+			env
+		);
 	},
 
 	// TODO: Replace with createPetsitter (auth handles user creation)
