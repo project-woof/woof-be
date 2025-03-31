@@ -19,7 +19,7 @@ export const bookingHandler = async (
 		if (booking.length === 0) {
 			return new Response("Booking Not Found", { status: 404 });
 		}
-		return new Response(JSON.stringify(booking), { status: 200 });
+		return new Response(JSON.stringify(booking[0]), { status: 200 });
 	}
 
 	// Get all bookings by petowner_id with pagination
@@ -104,7 +104,7 @@ export const bookingHandler = async (
 		if (booking.length === 0) {
 			return new Response("Booking Not Found", { status: 404 });
 		}
-		return new Response(JSON.stringify(booking), { status: 200 });
+		return new Response("Booking Deleted", { status: 200 });
 	}
 
 	// Booking API Endpoint Not Found

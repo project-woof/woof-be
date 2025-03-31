@@ -20,7 +20,7 @@ export const profileHandler = async (
 		if (!profile) {
 			return new Response("Profile not found", { status: 404 });
 		}
-		return new Response(JSON.stringify(profile), { status: 200 });
+		return new Response(JSON.stringify(profile[0]), { status: 200 });
 	}
 
 	// TODO: Replace with createPetsitter (auth handles user creation)
@@ -77,7 +77,7 @@ export const profileHandler = async (
 		if (profile[0].changes === 0) {
 			return new Response("Profile not found", { status: 404 });
 		}
-		return new Response(JSON.stringify(profile), { status: 200 });
+		return new Response("Profile Deleted", { status: 200 });
 	}
 
 	// Profile API Endpoint Not Found
