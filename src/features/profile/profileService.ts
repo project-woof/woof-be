@@ -22,7 +22,7 @@ export const profileService = {
 						petsitter.description AS petsitter_description,
 						petsitter.service_tags
 					FROM user
-					LEFT JOIN petsitter ON user.id = petsitter.id
+					INNER JOIN petsitter ON user.id = petsitter.id
 					WHERE user.id = ?;`;
 		return await d1Service.executeQuery<PetsitterProfile>(query, [userId], env);
 	},
