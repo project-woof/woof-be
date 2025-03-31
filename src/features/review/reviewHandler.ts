@@ -1,5 +1,5 @@
 import { reviewService } from "./reviewService";
-import type { ReviewData } from "@/types/reviewTypes";
+import type { Review } from "@/types/reviewTypes";
 
 export const reviewHandler = async (
 	request: Request,
@@ -19,10 +19,10 @@ export const reviewHandler = async (
 		}
 		const review = await reviewService.getReviewById(reviewId, env);
 		// Expect review to be returned as an array
-		if (Array.isArray(review) && review.length === 0) {
+		if (review.length === 0) {
 			return new Response("Review Not Found", { status: 404 });
 		}
-		return new Response(JSON.stringify(review), { status: 200 });
+		return new Response(JSON.stringify(review[0]), { status: 200 });
 	}
 
 	// Get all reviews by reviewer_id with pagination
@@ -94,7 +94,7 @@ export const reviewHandler = async (
 
 	// Update an existing review
 	if (url.pathname === "/review/updateReview" && request.method === "PUT") {
-		const body = (await request.json()) as Partial<ReviewData>;
+		const body = (await request.json()) as Partial<Review>;
 		const { review_id } = body;
 		if (!review_id) {
 			return new Response(JSON.stringify({ error: "Missing review ID" }), {

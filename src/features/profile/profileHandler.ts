@@ -1,5 +1,5 @@
 import { profileService } from "./profileService";
-import type { UserProfile } from "@/types/profileTypes";
+import type { User, Petsitter, PetsitterProfile } from "@/types/profileTypes";
 
 export const profileHandler = async (
 	request: Request,
@@ -45,13 +45,13 @@ export const profileHandler = async (
 	// Update an existing profile
 	if (url.pathname === "/profile/updateProfile" && request.method === "PUT") {
 		try {
-			const body = (await request.json()) as Partial<UserProfile>;
+			const body = (await request.json()) as Partial<User>;
 			// Expect body to contain a user_id and fields to update
-			const { user_id } = body;
-			if (!user_id) {
+			const { id } = body;
+			if (!id) {
 				return new Response("User ID is required", { status: 400 });
 			}
-			const success = await profileService.updateProfile(user_id, body, env);
+			const success = await profileService.updateProfile(id, body, env);
 			return success
 				? new Response("Profile updated", { status: 200 })
 				: new Response("Error updating profile", { status: 500 });

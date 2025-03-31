@@ -1,11 +1,12 @@
 import { d1Service } from "@/services/d1Service";
 import { generateUUID } from "@/utils/uuid";
+import type { Booking } from "@/types/bookingTypes";
 
 export const bookingService = {
 	// Get booking by booking_id
 	getBookingById: async (bookingId: string, env: Env): Promise<any> => {
 		const query = "SELECT * FROM booking WHERE booking_id = ?";
-		return await d1Service.executeQuery(query, [bookingId], env);
+		return await d1Service.executeQuery<Booking>(query, [bookingId], env);
 	},
 
 	// Get all bookings by petowner_id with pagination
@@ -25,7 +26,7 @@ export const bookingService = {
 		  WHERE booking.petowner_id = ?
 		  ORDER BY booking.created_at DESC 
 		  LIMIT ? OFFSET ?;`;
-		return await d1Service.executeQuery(
+		return await d1Service.executeQuery<Booking>(
 			query,
 			[petowner_id, limit, offset],
 			env
@@ -49,7 +50,7 @@ export const bookingService = {
 		  WHERE booking.petsitter_id = ?
 		  ORDER BY booking.created_at DESC 
 		  LIMIT ? OFFSET ?;`;
-		return await d1Service.executeQuery(
+		return await d1Service.executeQuery<Booking>(
 			query,
 			[petsitter_id, limit, offset],
 			env
@@ -78,6 +79,6 @@ export const bookingService = {
 	// Delete a booking
 	deleteBooking: async (bookingId: string, env: Env): Promise<any> => {
 		const query = "DELETE FROM booking WHERE booking_id = ?";
-		return await d1Service.executeQuery(query, [bookingId], env);
+		return await d1Service.executeQuery<Booking>(query, [bookingId], env);
 	},
 };

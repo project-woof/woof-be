@@ -1,12 +1,12 @@
 import { d1Service } from "@/services/d1Service";
 import { generateUUID } from "@/utils/uuid";
-import type { ReviewData } from "@/types/reviewTypes";
+import type { Review } from "@/types/reviewTypes";
 
 export const reviewService = {
 	// Get review by review_id
 	getReviewById: async (reviewId: string, env: Env): Promise<any> => {
 		const query = "SELECT * FROM review WHERE review_id = ?";
-		return await d1Service.executeQuery(query, [reviewId], env);
+		return await d1Service.executeQuery<Review>(query, [reviewId], env);
 	},
 
 	// Get all reviews by reviewer_id with pagination
@@ -27,7 +27,7 @@ export const reviewService = {
       ORDER BY review.created_at DESC 
       LIMIT ? OFFSET ?;
     `;
-		return await d1Service.executeQuery(
+		return await d1Service.executeQuery<Review>(
 			query,
 			[reviewerId, limit, offset],
 			env
@@ -52,7 +52,7 @@ export const reviewService = {
       ORDER BY review.created_at DESC 
       LIMIT ? OFFSET ?;
     `;
-		return await d1Service.executeQuery(
+		return await d1Service.executeQuery<Review>(
 			query,
 			[revieweeId, limit, offset],
 			env
@@ -82,7 +82,7 @@ export const reviewService = {
 	// Update an existing review
 	updateReview: async (
 		review_id: string,
-		data: Partial<ReviewData>,
+		data: Partial<Review>,
 		env: Env
 	): Promise<boolean> => {
 		let updateFields: string[] = [];
@@ -116,7 +116,7 @@ export const reviewService = {
 			", "
 		)}, last_updated = CURRENT_TIMESTAMP WHERE review_id = ?`;
 		try {
-			await d1Service.executeQuery(query, bindValues, env);
+			await d1Service.executeQuery<Review>(query, bindValues, env);
 			return true;
 		} catch (error) {
 			console.error("Error updating profile:", error);
@@ -127,6 +127,6 @@ export const reviewService = {
 	// Delete a review
 	deleteReview: async (reviewId: string, env: Env): Promise<any> => {
 		const query = "DELETE FROM review WHERE review_id = ?";
-		return await d1Service.executeQuery(query, [reviewId], env);
+		return await d1Service.executeQuery<Review>(query, [reviewId], env);
 	},
 };

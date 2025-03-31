@@ -1,12 +1,12 @@
 import { d1Service } from "@/services/d1Service";
 import { generateUUID } from "@/utils/uuid";
-import type { UserProfile } from "@/types/profileTypes";
+import type { User } from "@/types/profileTypes";
 
 export const profileService = {
 	// Get a profile by user ID
 	getProfileById: async (userId: string, env: Env): Promise<any | null> => {
 		const query = "SELECT * FROM user WHERE id = ?";
-		return await d1Service.executeQuery<any>(query, [userId], env);
+		return await d1Service.executeQuery<User>(query, [userId], env);
 	},
 
 	// TODO: Replace with createPetsitter (auth handles user creation)
@@ -36,7 +36,7 @@ export const profileService = {
 				(?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;
 			`;
 		try {
-			return await d1Service.executeQuery(
+			return await d1Service.executeQuery<User>(
 				query,
 				[
 					user_id,
@@ -59,7 +59,7 @@ export const profileService = {
 	// Update an existing profile (partial update)
 	updateProfile: async (
 		userId: string,
-		data: Partial<UserProfile>,
+		data: Partial<User>,
 		env: Env
 	): Promise<boolean> => {
 		const fields: string[] = [];
@@ -109,6 +109,6 @@ export const profileService = {
 	// Delete a profile by user ID
 	deleteProfile: async (userId: string, env: Env): Promise<any> => {
 		const query = "DELETE FROM user WHERE user_id = ?";
-		return await d1Service.executeQuery(query, [userId], env);
+		return await d1Service.executeQuery<User>(query, [userId], env);
 	},
 };
