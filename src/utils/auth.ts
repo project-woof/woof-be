@@ -1,6 +1,5 @@
 import { betterAuth } from "better-auth";
 import { D1Dialect } from "kysely-d1";
-import { oAuthProxy } from "better-auth/plugins";
 
 let auth: ReturnType<typeof betterAuth>;
 export function serverAuth(env: Env) {
@@ -47,16 +46,10 @@ export function serverAuth(env: Env) {
 				},
 			},
 			baseURL: env.BETTER_AUTH_URL,
-			plugins: [
-				oAuthProxy({
-					productionURL: "https://woof-fe.pages.dev",
-				}),
-			],
 			socialProviders: {
 				google: {
 					clientId: env.GOOGLE_CLIENT_ID!,
 					clientSecret: env.GOOGLE_CLIENT_SECRET!,
-					redirectURI: `${env.BETTER_AUTH_URL}/api/auth/callback/google`,
 				},
 			},
 		});
