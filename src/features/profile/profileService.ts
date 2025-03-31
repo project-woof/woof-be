@@ -6,8 +6,7 @@ export const profileService = {
 	// Get a profile by user ID
 	getProfileById: async (userId: string, env: Env): Promise<any | null> => {
 		const query = "SELECT * FROM user WHERE user_id = ?";
-		const result = await d1Service.executeQuery<any>(query, [userId], env);
-		return result.length > 0 ? result[0] : null;
+		return await d1Service.executeQuery<any>(query, [userId], env);
 	},
 
 	// TODO: Replace with createPetsitter (auth handles user creation)
