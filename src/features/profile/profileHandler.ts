@@ -24,7 +24,7 @@ export const profileHandler = async (
 	}
 
 	if (
-		url.pathname === "/profile/getPetsitterProfile/" &&
+		url.pathname.startsWith("/profile/getPetsitterProfile/") &&
 		request.method === "GET"
 	) {
 		const userId = url.pathname.split("/").pop();
@@ -43,7 +43,7 @@ export const profileHandler = async (
 
 	// TODO: Replace with createPetsitter (auth handles user creation)
 	// Create a new profile
-	if (url.pathname === "/profile/createProfile" && request.method === "POST") {
+	if (url.pathname.startsWith("/profile/createProfile") && request.method === "POST") {
 		try {
 			const body = await request.json();
 			const profile = await profileService.createProfile(body, env);
@@ -61,7 +61,7 @@ export const profileHandler = async (
 	}
 
 	// Update an existing profile
-	if (url.pathname === "/profile/updateProfile" && request.method === "PUT") {
+	if (url.pathname.startsWith("/profile/updateProfile") && request.method === "PUT") {
 		try {
 			const body = (await request.json()) as Partial<User>;
 			// Expect body to contain a user_id and fields to update
@@ -84,7 +84,7 @@ export const profileHandler = async (
 
 	// Delete a profile by user ID via query parameter (e.g. /profile/deleteProfile?id=USER_ID)
 	if (
-		url.pathname === "/profile/deleteProfile/" &&
+		url.pathname.startsWith("/profile/deleteProfile/") &&
 		request.method === "DELETE"
 	) {
 		const userId = url.pathname.split("/").pop();

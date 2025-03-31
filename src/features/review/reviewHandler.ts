@@ -66,7 +66,10 @@ export const reviewHandler = async (
 	}
 
 	// Create a new review
-	if (url.pathname === "/review/createReview" && request.method === "POST") {
+	if (
+		url.pathname.startsWith("/review/createReview") &&
+		request.method === "POST"
+	) {
 		try {
 			const body = await request.json();
 			const review = await reviewService.createReview(body, env);
@@ -93,7 +96,10 @@ export const reviewHandler = async (
 	}
 
 	// Update an existing review
-	if (url.pathname === "/review/updateReview" && request.method === "PUT") {
+	if (
+		url.pathname.startsWith("/review/updateReview") &&
+		request.method === "PUT"
+	) {
 		const body = (await request.json()) as Partial<Review>;
 		const { review_id } = body;
 		if (!review_id) {
@@ -108,7 +114,10 @@ export const reviewHandler = async (
 	}
 
 	// Delete a review
-	if (url.pathname === "/review/deleteReview/" && request.method === "DELETE") {
+	if (
+		url.pathname.startsWith("/review/deleteReview/") &&
+		request.method === "DELETE"
+	) {
 		const reviewId = url.pathname.split("/").pop();
 		if (!reviewId) {
 			return new Response("Review ID is required", { status: 400 });
