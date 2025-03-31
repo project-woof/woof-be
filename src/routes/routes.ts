@@ -31,7 +31,7 @@ export const handleRequest = async (
 	if (isProtectedRoute) {
 		const authResponse = await authMiddleware(request, auth, env);
 		if (authResponse) {
-			return authResponse;
+			return addCORSHeaders(authResponse, corsResponse);
 		}
 	}
 
