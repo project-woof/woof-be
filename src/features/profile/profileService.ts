@@ -1,17 +1,35 @@
 import { d1Service } from "@/services/d1Service";
 import { generateUUID } from "@/utils/uuid";
-import type { User } from "@/types/profileTypes";
+import type { User, PetsitterProfile } from "@/types/profileTypes";
 
 export const profileService = {
 	// Get a profile by user ID
-	getProfileById: async (userId: string, env: Env): Promise<any | null> => {
+	getProfileById: async (userId: string, env: Env): Promise<User[]> => {
 		const query = "SELECT * FROM user WHERE id = ?";
 		return await d1Service.executeQuery<User>(query, [userId], env);
 	},
 
+	// Get a petsitter profile by user ID
+	getPetsitterProfileById: async (
+		userId: string,
+		env: Env
+	): Promise<PetsitterProfile[]> => {
+		const query = `SELECT 
+						user.*,
+						petsitter.total_reviews,
+						petsitter.sum_of_rating,
+						petsitter.price,
+						petsitter.description AS petsitter_description,
+						petsitter.service_tags
+					FROM user
+					LEFT JOIN petsitter ON user.id = petsitter.id
+					WHERE user.id = ?;`;
+		return await d1Service.executeQuery<PetsitterProfile>(query, [userId], env);
+	},
+
 	// TODO: Replace with createPetsitter (auth handles user creation)
 	// Create a new profile
-	createProfile: async (body: any, env: Env): Promise<any | null> => {
+	createProfile: async (body: any, env: Env): Promise<User[]> => {
 		const user_id = generateUUID("user");
 		// Destructure expected fields from the incoming body.
 		const {
@@ -107,7 +125,7 @@ export const profileService = {
 	},
 
 	// Delete a profile by user ID
-	deleteProfile: async (userId: string, env: Env): Promise<any> => {
+	deleteProfile: async (userId: string, env: Env): Promise<User[]> => {
 		const query = "DELETE FROM user WHERE user_id = ?";
 		return await d1Service.executeQuery<User>(query, [userId], env);
 	},

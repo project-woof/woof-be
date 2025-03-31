@@ -1,5 +1,5 @@
 import { profileService } from "./profileService";
-import type { User, Petsitter, PetsitterProfile } from "@/types/profileTypes";
+import type { User } from "@/types/profileTypes";
 
 export const profileHandler = async (
 	request: Request,
@@ -17,10 +17,28 @@ export const profileHandler = async (
 			return new Response("User ID is required", { status: 400 });
 		}
 		const profile = await profileService.getProfileById(userId, env);
-		if (!profile) {
+		if (profile.length === 0) {
 			return new Response("Profile not found", { status: 404 });
 		}
 		return new Response(JSON.stringify(profile[0]), { status: 200 });
+	}
+
+	if (
+		url.pathname === "/profile/getPetsitterProfile/" &&
+		request.method === "GET"
+	) {
+		const userId = url.pathname.split("/").pop();
+		if (!userId) {
+			return new Response("User ID is required", { status: 400 });
+		}
+		const petsitterProfile = await profileService.getPetsitterProfileById(
+			userId,
+			env
+		);
+		if (petsitterProfile.length === 0) {
+			return new Response("Petsitter Profile not found", { status: 404 });
+		}
+		return new Response(JSON.stringify(petsitterProfile[0]), { status: 200 });
 	}
 
 	// TODO: Replace with createPetsitter (auth handles user creation)
@@ -74,7 +92,7 @@ export const profileHandler = async (
 			return new Response("User ID is required", { status: 400 });
 		}
 		const profile = await profileService.deleteProfile(userId, env);
-		if (profile[0].changes === 0) {
+		if (profile.length === 0) {
 			return new Response("Profile not found", { status: 404 });
 		}
 		return new Response("Profile Deleted", { status: 200 });

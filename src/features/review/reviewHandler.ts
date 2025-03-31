@@ -113,12 +113,12 @@ export const reviewHandler = async (
 		if (!reviewId) {
 			return new Response("Review ID is required", { status: 400 });
 		}
-		const result = await reviewService.deleteReview(reviewId, env);
+		const review = await reviewService.deleteReview(reviewId, env);
 		// Expect the result to be an array with a meta field
-		if (Array.isArray(result) && result[0]?.changes === 0) {
+		if (review.length === 0) {
 			return new Response("Review Not Found", { status: 404 });
 		}
-		return new Response(JSON.stringify(result), { status: 200 });
+		return new Response("Review Deleted", { status: 200 });
 	}
 
 	// Review API Endpoint Not Found

@@ -4,7 +4,7 @@ import type { Review } from "@/types/reviewTypes";
 
 export const reviewService = {
 	// Get review by review_id
-	getReviewById: async (reviewId: string, env: Env): Promise<any> => {
+	getReviewById: async (reviewId: string, env: Env): Promise<Review[]> => {
 		const query = "SELECT * FROM review WHERE review_id = ?";
 		return await d1Service.executeQuery<Review>(query, [reviewId], env);
 	},
@@ -15,7 +15,7 @@ export const reviewService = {
 		limit: number,
 		offset: number,
 		env: Env
-	): Promise<any[]> => {
+	): Promise<Review[]> => {
 		const query = `
       SELECT 
         review.*,
@@ -40,7 +40,7 @@ export const reviewService = {
 		limit: number,
 		offset: number,
 		env: Env
-	): Promise<any[]> => {
+	): Promise<Review[]> => {
 		const query = `
       SELECT 
         review.*,
@@ -60,7 +60,7 @@ export const reviewService = {
 	},
 
 	// Create a new review
-	createReview: async (body: any, env: Env): Promise<any> => {
+	createReview: async (body: any, env: Env): Promise<Review[]> => {
 		const review_id = generateUUID("review");
 		const { reviewer_id, reviewee_id, rating, comment } = body;
 		const query = `
@@ -68,7 +68,7 @@ export const reviewService = {
       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *;
     `;
 		try {
-			return await d1Service.executeQuery(
+			return await d1Service.executeQuery<Review>(
 				query,
 				[review_id, reviewer_id, reviewee_id, rating, comment],
 				env
@@ -125,7 +125,7 @@ export const reviewService = {
 	},
 
 	// Delete a review
-	deleteReview: async (reviewId: string, env: Env): Promise<any> => {
+	deleteReview: async (reviewId: string, env: Env): Promise<Review[]> => {
 		const query = "DELETE FROM review WHERE review_id = ?";
 		return await d1Service.executeQuery<Review>(query, [reviewId], env);
 	},

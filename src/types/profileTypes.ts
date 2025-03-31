@@ -20,7 +20,4 @@ export interface Petsitter {
 	service_tags: string[];
 }
 
-export interface PetsitterProfile extends User, Petsitter {
-	user: User;
-	petsitter: Petsitter;
-}
+export interface PetsitterProfile extends User, Petsitter {}

@@ -4,7 +4,7 @@ import type { Booking } from "@/types/bookingTypes";
 
 export const bookingService = {
 	// Get booking by booking_id
-	getBookingById: async (bookingId: string, env: Env): Promise<any> => {
+	getBookingById: async (bookingId: string, env: Env): Promise<Booking[]> => {
 		const query = "SELECT * FROM booking WHERE booking_id = ?";
 		return await d1Service.executeQuery<Booking>(query, [bookingId], env);
 	},
@@ -15,7 +15,7 @@ export const bookingService = {
 		limit: number,
 		offset: number,
 		env: Env
-	): Promise<any[]> => {
+	): Promise<Booking[]> => {
 		const query = `
 		  SELECT 
 			booking.*,
@@ -39,7 +39,7 @@ export const bookingService = {
 		limit: number,
 		offset: number,
 		env: Env
-	): Promise<any[]> => {
+	): Promise<Booking[]> => {
 		const query = `
 		  SELECT 
 			booking.*,
@@ -58,14 +58,14 @@ export const bookingService = {
 	},
 
 	// Create a new booking
-	createBooking: async (body: any, env: Env): Promise<any> => {
+	createBooking: async (body: any, env: Env): Promise<Booking[]> => {
 		const booking_id = generateUUID("booking");
 		const { petowner_id, petsitter_id, start_date, end_date } = body;
 		const query = `
 		INSERT INTO booking (booking_id, petowner_id, petsitter_id, start_date, end_date)
 		VALUES (?, ?, ?, ?, ?) RETURNING *;`;
 		try {
-			return await d1Service.executeQuery(
+			return await d1Service.executeQuery<Booking>(
 				query,
 				[booking_id, petowner_id, petsitter_id, start_date, end_date],
 				env
@@ -77,7 +77,7 @@ export const bookingService = {
 	},
 
 	// Delete a booking
-	deleteBooking: async (bookingId: string, env: Env): Promise<any> => {
+	deleteBooking: async (bookingId: string, env: Env): Promise<Booking[]> => {
 		const query = "DELETE FROM booking WHERE booking_id = ?";
 		return await d1Service.executeQuery<Booking>(query, [bookingId], env);
 	},
