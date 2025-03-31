@@ -20,4 +20,9 @@ export interface Petsitter {
 	service_tags: string[];
 }
 
-export interface PetsitterProfile extends User, Petsitter {}
+export interface PetsitterProfile extends User, Petsitter {
+	first_image?: string;
+	distance?: number;
+	avg_rating?: number;
+	composite_score?: number;
+}

@@ -27,6 +27,67 @@ export const profileService = {
 		return await d1Service.executeQuery<PetsitterProfile>(query, [userId], env);
 	},
 
+	// Get a list of petsitter profiles including profile_image with pagination
+	getPetsittersList: async (
+		userLat: number,
+		userLon: number,
+		limit: number,
+		offset: number,
+		env: Env
+	): Promise<PetsitterProfile[]> => {
+		const query = `
+		WITH petsitters_with_distance AS (
+			SELECT
+				u.*,
+				p.total_reviews,
+				p.sum_of_rating,
+				p.price,
+				p.description AS petsitter_description,
+				p.service_tags,
+				pi.image_url AS first_image,
+				sqrt(
+					(u.latitude - :user_lat) * (u.latitude - :user_lat) +
+					(u.longitude - :user_lon) * (u.longitude - :user_lon)
+				) AS distance,
+				CASE 
+					WHEN p.total_reviews > 0 THEN p.sum_of_rating / p.total_reviews 
+					ELSE 0 
+				END AS avg_rating
+			FROM user u
+			INNER JOIN petsitter p ON u.id = p.id
+			LEFT JOIN (
+				SELECT 
+					pi1.petsitter_id, 
+					pi1.image_url
+				FROM petsitter_image pi1
+				WHERE pi1.created_at = (
+					SELECT MIN(pi2.created_at)
+					FROM petsitter_image pi2
+					WHERE pi2.petsitter_id = pi1.petsitter_id
+				)
+			) pi ON p.id = pi.petsitter_id
+			WHERE u.is_petsitter = 1
+		)
+		SELECT
+			*,
+			(
+				0.5 * (1.0 / (distance + 1)) +
+				0.3 * avg_rating +
+				0.2 * total_reviews
+			) AS composite_score
+		FROM petsitters_with_distance
+		ORDER BY composite_score DESC
+		LIMIT :limit OFFSET :offset;
+		`;
+		const params = {
+			user_lat: userLat,
+			user_lon: userLon,
+			limit,
+			offset,
+		};
+		return await d1Service.executeQuery<PetsitterProfile>(query, [params], env);
+	},
+
 	// TODO: Replace with createPetsitter (auth handles user creation)
 	// Create a new profile
 	createProfile: async (body: any, env: Env): Promise<User[]> => {

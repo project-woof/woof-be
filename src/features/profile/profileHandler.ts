@@ -7,7 +7,7 @@ export const profileHandler = async (
 ): Promise<Response> => {
 	const url = new URL(request.url);
 
-	// GET profile by user ID via query parameter
+	// GET profile by user ID
 	if (
 		url.pathname.startsWith("/profile/getProfile/") &&
 		request.method === "GET"
@@ -23,6 +23,7 @@ export const profileHandler = async (
 		return new Response(JSON.stringify(profile[0]), { status: 200 });
 	}
 
+	// Get petsitter profile by user ID
 	if (
 		url.pathname.startsWith("/profile/getPetsitterProfile/") &&
 		request.method === "GET"
@@ -41,9 +42,54 @@ export const profileHandler = async (
 		return new Response(JSON.stringify(petsitterProfile[0]), { status: 200 });
 	}
 
+	// Get list of petsitters
+	if (
+		url.pathname.startsWith("/profile/getPetsitters") &&
+		request.method === "GET"
+	) {
+		const { searchParams } = new URL(request.url);
+		const DEFAULT_USER_LAT = 37.7749; // San Francisco (Golden Gate City :O)
+		const DEFAULT_USER_LON = -122.4194;
+
+		// Get latitude and longitude from query parameters
+		const userLat = parseFloat(
+			searchParams.get("userLat") ?? DEFAULT_USER_LAT.toString()
+		);
+		const userLon = parseFloat(
+			searchParams.get("userLon") ?? DEFAULT_USER_LON.toString()
+		);
+		const limit = parseInt(searchParams.get("limit") ?? "15", 10);
+		const offset = parseInt(searchParams.get("offset") ?? "0", 10);
+
+		if (isNaN(userLat) || isNaN(userLon)) {
+			return new Response("Latitude and longitude are required", {
+				status: 400,
+			});
+		}
+
+		try {
+			const petsitters = await profileService.getPetsittersList(
+				userLat,
+				userLon,
+				limit,
+				offset,
+				env
+			);
+			return new Response(JSON.stringify(petsitters), {
+				status: 200,
+			});
+		} catch (error) {
+			console.error("Error handling /profile/getPetsitters:", error);
+			return new Response("Internal Server Error", { status: 500 });
+		}
+	}
+
 	// TODO: Replace with createPetsitter (auth handles user creation)
 	// Create a new profile
-	if (url.pathname.startsWith("/profile/createProfile") && request.method === "POST") {
+	if (
+		url.pathname.startsWith("/profile/createProfile") &&
+		request.method === "POST"
+	) {
 		try {
 			const body = await request.json();
 			const profile = await profileService.createProfile(body, env);
@@ -61,7 +107,10 @@ export const profileHandler = async (
 	}
 
 	// Update an existing profile
-	if (url.pathname.startsWith("/profile/updateProfile") && request.method === "PUT") {
+	if (
+		url.pathname.startsWith("/profile/updateProfile") &&
+		request.method === "PUT"
+	) {
 		try {
 			const body = (await request.json()) as Partial<User>;
 			// Expect body to contain a user_id and fields to update
