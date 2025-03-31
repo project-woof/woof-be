@@ -40,13 +40,23 @@ export function serverAuth(env: Env) {
 					},
 				},
 			},
+			session: {
+				cookieCache: {
+					enabled: true,
+					maxAge: 24 * 60 * 60, // Cache duration in seconds
+				},
+			},
 			baseURL: env.BETTER_AUTH_URL,
-			plugins: [oAuthProxy()],
+			plugins: [
+				oAuthProxy({
+					productionURL: "https://woof-fe.pages.dev",
+				}),
+			],
 			socialProviders: {
 				google: {
 					clientId: env.GOOGLE_CLIENT_ID!,
 					clientSecret: env.GOOGLE_CLIENT_SECRET!,
-					redirectURI: "https://woof-fe.pages.dev/api/auth/callback/google",
+					redirectURI: `${env.BETTER_AUTH_URL}/api/auth/callback/google`,
 				},
 			},
 		});
