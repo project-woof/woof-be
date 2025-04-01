@@ -41,14 +41,7 @@ export const handleRequest = async (
 		response = await auth.handler(request);
 		//If it's google callback, then redirect after the auth handler is called
 		if (url.pathname === "/api/auth/callback/google") {
-			const params = new URLSearchParams(url.search);
-			const newUserCallbackURL = params.get("newUserCallbackURL");
-			let redirectURL = "https://woof-fe.pages.dev";
-			if (newUserCallbackURL) {
-				redirectURL = `${redirectURL}${newUserCallbackURL}?login=success`;
-			} else {
-				redirectURL = `${redirectURL}?login=success`;
-			}
+			const redirectURL = "https://woof-fe.pages.dev?login=success";
 			response = Response.redirect(redirectURL, 302);
 		}
 	} else if (url.pathname.startsWith("/chat")) {
