@@ -1,4 +1,5 @@
 export const protectedRoutes = [
+	{ path: "/api/auth/get-user", method: "GET" },
 	{ path: "/profile", method: "PUT" },
 	{ path: "/profile", method: "DELETE" },
 	{ path: "/review", method: "POST" },
