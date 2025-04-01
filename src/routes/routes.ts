@@ -40,10 +40,10 @@ export const handleRequest = async (
 	} else if (url.pathname.startsWith("/api/auth")) {
 		response = await auth.handler(request);
 		//If it's google callback, then redirect after the auth handler is called
-		if (url.pathname === "/api/auth/callback/google") {
-			const redirectURL = "https://woof-fe.pages.dev?login=success";
-			response = Response.redirect(redirectURL, 302);
-		}
+		// if (url.pathname === "/api/auth/callback/google") {
+		// 	const redirectURL = "https://woof-fe.pages.dev?login=success";
+		// 	response = Response.redirect(redirectURL, 302);
+		// }
 	} else if (url.pathname.startsWith("/chat")) {
 		response = await chatHandler(request, env);
 	} else if (url.pathname.startsWith("/booking")) {
