@@ -21,13 +21,13 @@ export const authHandler = async (
 		return Response.redirect(redirectURL, 302);
 	}
 
-	// Return session if called
-	if (url.pathname === "/api/auth/get-session" && request.method === "GET") {
-		const session = await auth.api.getSession({
-			headers: request.headers,
-		});
-		return new Response(JSON.stringify(session), { status: 200 });
-	}
+	// // Return session if called
+	// if (url.pathname === "/api/auth/get-session" && request.method === "GET") {
+	// 	const session = await auth.api.getSession({
+	// 		headers: request.headers,
+	// 	});
+	// 	return new Response(JSON.stringify(session), { status: 200 });
+	// }
 
 	// Serve other auth endpoints
 	return await auth.handler(request);
