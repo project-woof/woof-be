@@ -52,6 +52,7 @@ export function serverAuth(env: Env) {
 					partitioned: true, // New browser standards will mandate this for foreign cookies
 				},
 			},
+			trustedOrigins: ["https://woof-fe.pages.dev"],
 			baseURL: env.BETTER_AUTH_URL,
 			socialProviders: {
 				google: {
