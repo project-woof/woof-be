@@ -1,5 +1,6 @@
 import { healthCheck } from "@/utils/health";
 import { handleCORS, addCORSHeaders } from "@/utils/cors";
+import { authHandler } from "@/features/auth/authHandler";
 import { chatHandler } from "@/features/chat/chatHandler";
 import { bookingHandler } from "@/features/booking/bookingHandler";
 import { profileHandler } from "@/features/profile/profileHandler";
@@ -38,12 +39,7 @@ export const handleRequest = async (
 	if (url.pathname.startsWith("/health")) {
 		response = await healthCheck(env);
 	} else if (url.pathname.startsWith("/api/auth")) {
-		response = await auth.handler(request);
-		//If it's google callback, then redirect after the auth handler is called
-		// if (url.pathname === "/api/auth/callback/google") {
-		// 	const redirectURL = "https://woof-fe.pages.dev?login=success";
-		// 	response = Response.redirect(redirectURL, 302);
-		// }
+		response = await authHandler(auth, request, env);
 	} else if (url.pathname.startsWith("/chat")) {
 		response = await chatHandler(request, env);
 	} else if (url.pathname.startsWith("/booking")) {
