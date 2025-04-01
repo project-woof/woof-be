@@ -38,7 +38,7 @@ export const handleRequest = async (
 	if (url.pathname.startsWith("/health")) {
 		response = await healthCheck(env);
 	} else if (url.pathname.startsWith("/api/auth")) {
-		if (url.pathname === "/api/auth/google/callback") {
+		if (url.pathname === "/api/auth/callback/google") {
 			const params = new URLSearchParams(url.search);
 			const newUser = params.get("newUser");
 			const newUserCallbackURL = params.get("newUserCallbackURL");
