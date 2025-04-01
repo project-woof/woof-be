@@ -23,13 +23,10 @@ export const authHandler = async (
 
 	// Return session if called
 	if (url.pathname === "/api/auth/get-session" && request.method === "GET") {
-		return new Response(
-			JSON.stringify(
-				auth.api.getSession({
-					headers: request.headers,
-				})
-			)
-		);
+		const session = await auth.api.getSession({
+			headers: request.headers,
+		});
+		return new Response(JSON.stringify(session), { status: 200 });
 	}
 
 	// Serve other auth endpoints
