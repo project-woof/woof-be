@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { bearer } from "better-auth/plugins";
 import { D1Dialect } from "kysely-d1";
 
 let auth: ReturnType<typeof betterAuth>;
@@ -39,20 +40,6 @@ export function serverAuth(env: Env) {
 					},
 				},
 			},
-			session: {
-				cookieCache: {
-					enabled: true,
-					maxAge: 24 * 60 * 60, // Cache duration in seconds
-				},
-			},
-			advanced: {
-				defaultCookieAttributes: {
-					sameSite: "none",
-					secure: true,
-					partitioned: true, // New browser standards will mandate this for foreign cookies
-				},
-			},
-			trustedOrigins: ["https://woof-fe.pages.dev"],
 			baseURL: env.BETTER_AUTH_URL,
 			socialProviders: {
 				google: {
@@ -60,6 +47,7 @@ export function serverAuth(env: Env) {
 					clientSecret: env.GOOGLE_CLIENT_SECRET!,
 				},
 			},
+			plugins: [bearer()],
 		});
 	}
 	return auth;
