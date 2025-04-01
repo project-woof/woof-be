@@ -42,10 +42,9 @@ export const handleRequest = async (
 		//If it's google callback, then redirect after the auth handler is called
 		if (url.pathname === "/api/auth/callback/google") {
 			const params = new URLSearchParams(url.search);
-			const newUser = params.get("newUser");
 			const newUserCallbackURL = params.get("newUserCallbackURL");
 			let redirectURL = "https://woof-fe.pages.dev";
-			if (newUser === "true" && newUserCallbackURL) {
+			if (newUserCallbackURL) {
 				redirectURL = `${redirectURL}${newUserCallbackURL}?login=success`;
 			} else {
 				redirectURL = `${redirectURL}?login=success`;
