@@ -22,7 +22,7 @@ export const authHandler = async (
 		const cookie = request.headers.get("Cookie");
 		const bearer_token = cookie?.split("=")[1].split(".")[0];
 		const clientURL = "https://woof-fe.pages.dev";
-		const redirectURL = `${clientURL}/signup?login=success&token=${bearer_token}`;
+		const redirectURL = `${clientURL}/onboarding?login=success&token=${bearer_token}`;
 		return Response.redirect(redirectURL, 302);
 	}
 
