@@ -6,24 +6,46 @@ export const chatHandler = async (
 ): Promise<Response> => {
 	const url = new URL(request.url);
 
-	if (url.pathname === "/chat/create" && request.method === "POST") {
-		const { roomName } = await request.json();
-		const chatRoom = await chatService.createChatRoom(roomName, env);
-		return new Response(JSON.stringify(chatRoom), { status: 201 });
+	// Get chat rooms by user_id
+	if (url.pathname === "/chat/getChatRooms/" && request.method === "GET") {
+		const userId = url.pathname.split("/").pop();
+		if (!userId) {
+			return new Response("User ID is required", { status: 400 });
+		}
+		const chatRooms = await chatService.getChatRooms(userId, env);
+		return new Response(JSON.stringify(chatRooms), { status: 200 });
 	}
 
-	if (url.pathname === "/chat/messages" && request.method === "POST") {
-		const { roomId, userId, message } = await request.json();
-		const success = await chatService.addMessageToChatRoom(
-			roomId,
-			userId,
-			message,
-			env
-		);
-		return success
-			? new Response("Message added", { status: 200 })
-			: new Response("Error adding message", { status: 500 });
+	// Get messages by room_id
+	if (url.pathname === "/chat/getMessages/" && request.method === "GET") {
+		const roomId = url.pathname.split("/").pop();
+		if (!roomId) {
+			return new Response("Room ID is required", { status: 400 });
+		}
+		const messages = await chatService.getMessages(roomId, env);
+		return new Response(JSON.stringify(messages), { status: 200 });
 	}
 
-	return new Response("Not Found", { status: 404 });
+	// Create a new chat room
+	if (url.pathname === "/chat/createChatRoom" && request.method === "POST") {
+		const body = await request.json();
+		const chatRoom = await chatService.createChatRoom(body, env);
+		if (chatRoom.length === 0) {
+			return new Response("Chat Room Not Created Or Found", { status: 400 });
+		}
+		return new Response(JSON.stringify(chatRoom[0]), { status: 201 });
+	}
+
+	// Create a new message in a chat room
+	if (url.pathname === "/chat/createMessage" && request.method === "POST") {
+		const body = await request.json();
+		const message = await chatService.addMessageToChatRoom(body, env);
+		if (message.length === 0) {
+			return new Response("Message Not Created", { status: 400 });
+		}
+		return new Response(JSON.stringify(message[0]), { status: 201 });
+	}
+
+	// Chat API Endpoint Not Found
+	return new Response("Chat API Endpoint Not Found", { status: 404 });
 };

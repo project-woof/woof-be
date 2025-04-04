@@ -1,5 +1,4 @@
 import { notificationService } from "./notificationService";
-import { CreateBookingRequestBody } from "@/types/notificationTypes";
 
 export const notificationHandler = async (
 	request: Request,
@@ -7,24 +6,22 @@ export const notificationHandler = async (
 ): Promise<Response> => {
 	const url = new URL(request.url);
 
-	if (url.pathname === "/notification/create" && request.method === "POST") {
-		const { userId, message }: CreateBookingRequestBody = await request.json();
-		const notification = await notificationService.createNotification(
+	// Get notifications by user_id
+	if (
+		url.pathname === "/notification/getNofications/" &&
+		request.method === "GET"
+	) {
+		const userId = url.pathname.split("/").pop();
+		if (!userId) {
+			return new Response("User ID is required", { status: 400 });
+		}
+		const notifications = await notificationService.getNotifications(
 			userId,
-			message,
 			env
 		);
-		return new Response(JSON.stringify(notification), { status: 201 });
+		return new Response(JSON.stringify(notifications), { status: 201 });
 	}
 
-	if (url.pathname === "/notification/user" && request.method === "GET") {
-		const userId = request.headers.get("user-id");
-		const notifications = await notificationService.getNotificationsForUser(
-			userId!,
-			env
-		);
-		return new Response(JSON.stringify(notifications), { status: 200 });
-	}
-
-	return new Response("Not Found", { status: 404 });
+	// Notification API Endpoint Not Found
+	return new Response("Notification API Endpoint Not Found", { status: 404 });
 };
