@@ -29,7 +29,7 @@ export const chatService = {
 		room_id: string,
 		env: Env
 	): Promise<ChatMessageSummary[]> => {
-		const query = `SELECT sender_id, text, created_at
+		const query = `SELECT message_id, sender_id, text, created_at
 						FROM chatmessage WHERE room_id = ?;`;
 		return await d1Service.executeQuery<ChatMessageSummary>(
 			query,
