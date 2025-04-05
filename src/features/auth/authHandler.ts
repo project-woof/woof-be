@@ -12,7 +12,10 @@ export const authHandler = async (
 	if (url.pathname === "/api/auth/" && request.method === "GET") {
 		const cookie = request.headers.get("Cookie");
 		const bearer_token = cookie?.split("=")[1].split(".")[0];
-		const clientURL = "https://woof-fe.pages.dev";
+		const clientURL =
+			env.ENVIRONMENT === "production"
+				? env.CLIENT_PROD_URL
+				: "http://localhost:3000";
 		const redirectURL = `${clientURL}/?login=success&token=${bearer_token}`;
 		return Response.redirect(redirectURL, 302);
 	}
@@ -21,7 +24,10 @@ export const authHandler = async (
 	if (url.pathname === "/api/auth/signup" && request.method === "GET") {
 		const cookie = request.headers.get("Cookie");
 		const bearer_token = cookie?.split("=")[1].split(".")[0];
-		const clientURL = "https://woof-fe.pages.dev";
+		const clientURL =
+			env.ENVIRONMENT === "production"
+				? env.CLIENT_PROD_URL
+				: "http://localhost:3000";
 		const redirectURL = `${clientURL}/onboarding?login=success&token=${bearer_token}`;
 		return Response.redirect(redirectURL, 302);
 	}
