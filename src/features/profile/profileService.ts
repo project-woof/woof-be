@@ -35,50 +35,44 @@ export const profileService = {
 		offset: number,
 		env: Env
 	): Promise<PetsitterProfile[]> => {
-		const query = `
-		WITH petsitters_with_distance AS (
-			SELECT
-				u.*,
-				p.total_reviews,
-				p.sum_of_rating,
-				p.price,
-				p.description AS petsitter_description,
-				p.service_tags,
-				pi.image_url AS first_image,
-				sqrt(
-					(u.latitude - ?) * (u.latitude - ?) +
-					(u.longitude - ?) * (u.longitude - ?)
-				) AS distance,
-				CASE 
-					WHEN p.total_reviews > 0 THEN p.sum_of_rating / p.total_reviews 
-					ELSE 0 
-				END AS avg_rating
-			FROM user u
-			INNER JOIN petsitter p ON u.id = p.id
-			LEFT JOIN (
-				SELECT 
-					pi1.petsitter_id, 
-					pi1.image_url
-				FROM petsitter_image pi1
-				WHERE pi1.created_at = (
-					SELECT MIN(pi2.created_at)
-					FROM petsitter_image pi2
-					WHERE pi2.petsitter_id = pi1.petsitter_id
-				)
-			) pi ON p.id = pi.petsitter_id
-			WHERE u.is_petsitter = 1
-		)
-		SELECT
-			*,
-			(
-				0.5 * (1.0 / (distance + 1)) +
-				0.3 * avg_rating +
-				0.2 * total_reviews
-			) AS composite_score
-		FROM petsitters_with_distance
-		ORDER BY composite_score DESC
-		LIMIT ? OFFSET ?;
-		`;
+		const query = `WITH petsitters_with_distance AS (
+						SELECT
+							u.*,
+							p.total_reviews,
+							p.sum_of_rating,
+							p.price,
+							p.description AS petsitter_description,
+							p.service_tags,
+							(
+								SELECT pi.image_url
+								FROM petsitter_image pi
+								WHERE pi.petsitter_id = p.id
+								ORDER BY pi.created_at ASC
+								LIMIT 1
+							) AS first_image,
+							sqrt(
+								(u.latitude - ?)*(u.latitude - ?) +
+								(u.longitude - ?)*(u.longitude - ?)
+							) AS distance,
+							CASE 
+								WHEN p.total_reviews > 0 THEN p.sum_of_rating / p.total_reviews 
+								ELSE 0 
+							END AS avg_rating
+						FROM user u
+						INNER JOIN petsitter p ON u.id = p.id
+						WHERE u.is_petsitter = 1
+					)
+					SELECT
+						*,
+						(
+							0.5 * (1.0 / (distance + 1)) +
+							0.3 * avg_rating +
+							0.2 * total_reviews
+						) AS composite_score
+					FROM petsitters_with_distance
+					ORDER BY composite_score DESC
+					LIMIT ? OFFSET ?;
+				`;
 		return await d1Service.executeQuery<PetsitterProfile>(
 			query,
 			[userLat, userLat, userLon, userLon, limit, offset],
