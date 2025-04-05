@@ -13,13 +13,27 @@ export const chatService = {
 		user_id: string,
 		env: Env
 	): Promise<ChatRoomSummary[]> => {
-		const query = `SELECT room_id, participant1_id, participant2_id, last_message, last_updated
-						FROM chatroom 
-						WHERE participant1_id = ? 
-						OR participant2_id = ?;`;
+		const query = `SELECT 
+					c.room_id,
+					CASE 
+						WHEN c.participant1_id = ? THEN u2.username 
+						ELSE u1.username 
+					END AS username,
+					CASE 
+						WHEN c.participant1_id = ? THEN u2.profile_image_url 
+						ELSE u1.profile_image_url 
+					END AS profile_image_url,
+					c.last_message,
+					c.last_updated
+					FROM chatroom c
+					JOIN user u1 ON c.participant1_id = u1.id
+					JOIN user u2 ON c.participant2_id = u2.id
+					WHERE c.participant1_id = ? OR c.participant2_id = ?
+					ORDER BY c.last_updated DESC;
+					`;
 		return await d1Service.executeQuery<ChatRoomSummary>(
 			query,
-			[user_id, user_id],
+			[user_id, user_id, user_id, user_id],
 			env
 		);
 	},
@@ -30,7 +44,8 @@ export const chatService = {
 		env: Env
 	): Promise<ChatMessageSummary[]> => {
 		const query = `SELECT message_id, sender_id, text, created_at
-						FROM chatmessage WHERE room_id = ?;`;
+						FROM chatmessage WHERE room_id = ?
+						ORDER BY created_at ASC;`;
 		return await d1Service.executeQuery<ChatMessageSummary>(
 			query,
 			[room_id],
