@@ -8,6 +8,40 @@ import {
 } from "@/types/chatTypes";
 
 export const chatService = {
+	// Get chat room by participant IDs
+	getChatRoomByParticipantIds: async (body: any, env: Env): Promise<ChatRoom[]> => {
+		const { participant1_id, participant2_id } = body;
+		const query = `
+					SELECT *
+					FROM chatroom
+					WHERE 
+						CASE
+							WHEN ? < ? THEN 
+							CASE 
+								WHEN participant1_id = ? AND participant2_id = ? THEN 1 
+								ELSE 0 
+							END
+							ELSE 
+							CASE 
+								WHEN participant1_id = ? AND participant2_id = ? THEN 1 
+								ELSE 0 
+							END
+						END = 1
+				`;
+		return await d1Service.executeQuery<ChatRoom>(
+			query,
+			[
+				participant1_id,
+				participant2_id,
+				participant1_id,
+				participant2_id,
+				participant2_id,
+				participant1_id,
+			],
+			env
+		);
+	},
+
 	// Get chat rooms by user_id
 	getChatRooms: async (
 		user_id: string,
@@ -53,39 +87,31 @@ export const chatService = {
 		);
 	},
 
-	// Create a new chat room if room doesn't exist
+	// Create a new chat room
 	createChatRoom: async (body: any, env: Env): Promise<ChatRoom[]> => {
 		const room_id = generateUUID("room");
 		const { participant1_id, participant2_id } = body;
-		const query = `WITH existing AS (
-						SELECT *
-						FROM chatroom
-						WHERE participant1_id = LEAST(?, ?)
-						AND participant2_id = GREATEST(?, ?)
-						LIMIT 1
-					),
-					inserted AS (
+		const insertQuery = `
 						INSERT INTO chatroom (room_id, participant1_id, participant2_id)
-						SELECT ?, LEAST(?, ?), GREATEST(?, ?)
-						WHERE NOT EXISTS (SELECT 1 FROM existing)
+						VALUES (
+							?,
+							CASE WHEN ? < ? THEN ? ELSE ? END,
+							CASE WHEN ? < ? THEN ? ELSE ? END
+						)
 						RETURNING *
-					)
-					SELECT * FROM existing
-					UNION ALL
-					SELECT * FROM inserted;
 					`;
 		return await d1Service.executeQuery<ChatRoom>(
-			query,
+			insertQuery,
 			[
-				participant1_id,
-				participant2_id,
-				participant1_id,
-				participant2_id,
 				room_id,
 				participant1_id,
 				participant2_id,
 				participant1_id,
 				participant2_id,
+				participant1_id,
+				participant2_id,
+				participant2_id,
+				participant1_id,
 			],
 			env
 		);
@@ -95,23 +121,33 @@ export const chatService = {
 	addMessageToChatRoom: async (body: any, env: Env): Promise<ChatMessage[]> => {
 		const message_id = generateUUID("message");
 		const { room_id, sender_id, text } = body;
-		const query = `WITH new_message AS (
-						INSERT INTO chatmessage (message_id, room_id, sender_id, text)
-						VALUES (?, ?, ?, ?)
-						RETURNING *
-					),
-					update_chatroom AS (
-						UPDATE chatroom
-						SET last_message = ?,
-							last_updated = CURRENT_TIMESTAMP
-						WHERE room_id = ?
-					)
-					SELECT * FROM new_message;
-					`;
-		return await d1Service.executeQuery<ChatMessage>(
-			query,
-			[message_id, room_id, sender_id, text, text, room_id],
-			env
-		);
+
+		// Due to Cloudflare Workers and D1 limitations, we cannot combine INSERT and UPDATE in a single query. ;-;
+		const query = `
+			INSERT INTO chatmessage (message_id, room_id, sender_id, text)
+			VALUES (?, ?, ?, ?) RETURNING *;
+		`;
+		try {
+			const message = await d1Service.executeQuery<ChatMessage>(
+				query,
+				[message_id, room_id, sender_id, text],
+				env
+			);
+
+			if (message.length > 0) {
+				const updateQuery = `
+					UPDATE chatroom
+					SET last_message = ?,
+						last_updated = CURRENT_TIMESTAMP
+					WHERE room_id = ?
+				`;
+				await d1Service.executeQuery(updateQuery, [text, room_id], env);
+			}
+
+			return message;
+		} catch (error) {
+			console.error("Failed to add message:", error);
+			throw new Error(`Failed to add message: ${(error as Error).message}`);
+		}
 	},
 };

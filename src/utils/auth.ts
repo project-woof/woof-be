@@ -40,7 +40,10 @@ export function serverAuth(env: Env) {
 					},
 				},
 			},
-			baseURL: env.BETTER_AUTH_URL,
+			baseURL:
+				env.ENVIRONMENT === "production"
+					? env.BETTER_AUTH_URL
+					: "http://127.0.0.1:8787",
 			socialProviders: {
 				google: {
 					clientId: env.GOOGLE_CLIENT_ID!,

@@ -1,3 +1,4 @@
+import { stringify } from "querystring";
 import { chatService } from "./chatService";
 
 export const chatHandler = async (
@@ -7,7 +8,10 @@ export const chatHandler = async (
 	const url = new URL(request.url);
 
 	// Get chat rooms by user_id
-	if (url.pathname.startsWith("/chat/getChatRooms/") && request.method === "GET") {
+	if (
+		url.pathname.startsWith("/chat/getChatRooms/") &&
+		request.method === "GET"
+	) {
 		const userId = url.pathname.split("/").pop();
 		if (!userId) {
 			return new Response("User ID is required", { status: 400 });
@@ -17,7 +21,10 @@ export const chatHandler = async (
 	}
 
 	// Get messages by room_id
-	if (url.pathname.startsWith("/chat/getMessages/") && request.method === "GET") {
+	if (
+		url.pathname.startsWith("/chat/getMessages/") &&
+		request.method === "GET"
+	) {
 		const roomId = url.pathname.split("/").pop();
 		if (!roomId) {
 			return new Response("Room ID is required", { status: 400 });
@@ -27,23 +34,41 @@ export const chatHandler = async (
 	}
 
 	// Create a new chat room
-	if (url.pathname.startsWith("/chat/createChatRoom") && request.method === "POST") {
+	if (
+		url.pathname.startsWith("/chat/createChatRoom") &&
+		request.method === "POST"
+	) {
 		const body = await request.json();
-		const chatRoom = await chatService.createChatRoom(body, env);
-		if (chatRoom.length === 0) {
+		const existingChatRoom = await chatService.getChatRoomByParticipantIds(
+			body,
+			env
+		);
+		if (existingChatRoom.length > 0) {
+			return new Response(JSON.stringify(existingChatRoom[0]), { status: 200 });
+		}
+		const newChatRoom = await chatService.createChatRoom(body, env);
+		if (newChatRoom.length === 0) {
 			return new Response("Chat Room Not Created Or Found", { status: 400 });
 		}
-		return new Response(JSON.stringify(chatRoom[0]), { status: 201 });
+		return new Response(JSON.stringify(newChatRoom[0]), { status: 201 });
 	}
 
 	// Create a new message in a chat room
-	if (url.pathname.startsWith("/chat/createMessage") && request.method === "POST") {
-		const body = await request.json();
-		const message = await chatService.addMessageToChatRoom(body, env);
-		if (message.length === 0) {
-			return new Response("Message Not Created", { status: 400 });
+	if (
+		url.pathname.startsWith("/chat/createMessage") &&
+		request.method === "POST"
+	) {
+		try {
+			const body = await request.json();
+			const message = await chatService.addMessageToChatRoom(body, env);
+			if (message.length === 0) {
+				return new Response("Message Not Created", { status: 400 });
+			}
+			return new Response(JSON.stringify(message[0]), { status: 201 });
+		} catch (error) {
+			console.error("Error creating message:", error);
+			return new Response("Internal Server Error", { status: 500 });
 		}
-		return new Response(JSON.stringify(message[0]), { status: 201 });
 	}
 
 	// Chat API Endpoint Not Found
