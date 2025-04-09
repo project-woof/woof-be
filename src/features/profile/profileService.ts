@@ -102,7 +102,7 @@ export const profileService = {
 
 		const query = `
 			INSERT INTO user 
-				(user_id, username, email, profile_image_url, latitude, longitude, description, is_petsitter)
+				(id, username, email, profile_image_url, latitude, longitude, description, is_petsitter)
 			VALUES 
 				(?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;
 			`;
@@ -130,9 +130,15 @@ export const profileService = {
 	// Update an existing profile (partial update)
 	updateProfile: async (
 		userId: string,
-		data: Partial<User>,
+		data: Partial<PetsitterProfile>,
 		env: Env
-	): Promise<boolean> => {
+	): Promise<boolean> => {		
+		if (
+			(data.is_petsitter !== undefined || data.is_petsitter === 1) &&
+			data.price === undefined 
+		) {
+			throw new Error("Missing required petsitter fields: price");
+		}
 		const fields: string[] = [];
 		const values: any[] = [];
 		if (data.username !== undefined) {
@@ -167,9 +173,34 @@ export const profileService = {
 		values.push(userId);
 		const query = `UPDATE user SET ${fields.join(
 			", "
-		)}, last_updated = CURRENT_TIMESTAMP WHERE user_id = ?`;
+		)}, last_updated = CURRENT_TIMESTAMP WHERE id = ?`;
 		try {
 			await d1Service.executeQuery(query, values, env);
+
+			if (data.is_petsitter === undefined || data.is_petsitter === 0){
+				return true
+			}
+
+			const insertQuery = `
+			INSERT INTO petsitter (id, total_reviews, sum_of_rating, price, description, service_tags)
+			VALUES (?, ?, ?, ?, ?, ?) RETURNING *;
+			`;
+
+			const params = [
+				userId,
+				0,
+				0,
+				data.price,
+				data.petsitter_description || "",
+				data.service_tags || "[]"
+			]
+			
+			await d1Service.executeQuery(
+				insertQuery,
+				params,
+				env
+			)
+			
 			return true;
 		} catch (error) {
 			console.error("Error updating profile:", error);

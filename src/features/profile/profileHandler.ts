@@ -1,5 +1,5 @@
 import { profileService } from "./profileService";
-import type { User } from "@/types/profileTypes";
+import type { PetsitterProfile } from "@/types/profileTypes";
 
 export const profileHandler = async (
 	request: Request,
@@ -106,7 +106,7 @@ export const profileHandler = async (
 		request.method === "PUT"
 	) {
 		try {
-			const body = (await request.json()) as Partial<User>;
+			const body = (await request.json()) as Partial<PetsitterProfile>;
 			// Expect body to contain a user_id and fields to update
 			const { id } = body;
 			if (!id) {
@@ -114,7 +114,7 @@ export const profileHandler = async (
 			}
 			const success = await profileService.updateProfile(id, body, env);
 			return success
-				? new Response("Profile updated", { status: 200 })
+				? new Response("Profile updated", { status: 201 })
 				: new Response("Error updating profile", { status: 500 });
 		} catch (error: unknown) {
 			console.error("Error updating profile:", error);
