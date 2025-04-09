@@ -94,14 +94,13 @@ export class PetsitterDO extends DurableObject<Env> {
 					: new TextDecoder().decode(message);
 			const clientMsg = JSON.parse(text);
 			if (clientMsg.action === "send_message") {
-				const { room_id, message: content } = clientMsg;
+				const { room_id, message: content, message_id, created_at } = clientMsg;
 				const query = `
 						SELECT participant1_id, participant2_id FROM chatroom
-						WHERE room_id = ? AND (participant1_id = ? OR participant2_id = ?)
-						LIMIT 1;
+						WHERE room_id = ?;
 						`;
 				const chatroom = await this.env.PETSITTER_DB.prepare(query)
-					.bind(room_id, this.userId, this.userId)
+					.bind(room_id)
 					.first<{ participant1_id: string; participant2_id: string }>();
 				if (!chatroom) {
 					ws.send(
@@ -116,19 +115,13 @@ export class PetsitterDO extends DurableObject<Env> {
 					chatroom.participant1_id === this.userId
 						? chatroom.participant2_id
 						: chatroom.participant1_id;
-				const updateQuery = `
-							UPDATE chatroom
-							SET last_message = ?, last_updated = CURRENT_TIMESTAMP
-							WHERE room_id = ?;
-							`;
-				await this.env.PETSITTER_DB.prepare(updateQuery)
-					.bind(content, room_id)
-					.run();
 				const serverMsg = {
 					type: "message",
 					room_id,
+					message_id,
 					from: this.userId,
 					message: content,
+					created_at,
 				};
 				const recipientIdObj = this.env.PETSITTER_DO.idFromName(recipientId);
 				await this.env.PETSITTER_DO.get(recipientIdObj).fetch(
