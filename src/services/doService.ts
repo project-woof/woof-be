@@ -94,7 +94,13 @@ export class PetsitterDO extends DurableObject<Env> {
 					: new TextDecoder().decode(message);
 			const clientMsg = JSON.parse(text);
 			if (clientMsg.action === "send_message") {
-				const { room_id, message: content, message_id, created_at } = clientMsg;
+				const {
+					room_id,
+					message: content,
+					message_id,
+					created_at,
+					sender_id,
+				} = clientMsg;
 				const query = `
 						SELECT participant1_id, participant2_id FROM chatroom
 						WHERE room_id = ?;
@@ -119,7 +125,7 @@ export class PetsitterDO extends DurableObject<Env> {
 					type: "message",
 					room_id,
 					message_id,
-					from: this.userId,
+					sender_id: sender_id,
 					message: content,
 					created_at,
 				};
