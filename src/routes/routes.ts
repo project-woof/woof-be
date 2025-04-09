@@ -1,5 +1,6 @@
 import { healthCheck } from "@/utils/health";
 import { handleCORS, addCORSHeaders } from "@/utils/cors";
+import { websocketHandler } from "@/features/websocket/websocketHandler";
 import { authHandler } from "@/features/auth/authHandler";
 import { chatHandler } from "@/features/chat/chatHandler";
 import { bookingHandler } from "@/features/booking/bookingHandler";
@@ -38,6 +39,8 @@ export const handleRequest = async (
 
 	if (url.pathname.startsWith("/health")) {
 		response = await healthCheck(env);
+	} else if (url.pathname.startsWith("/ws")) {
+		return await websocketHandler(request, env);
 	} else if (url.pathname.startsWith("/api/auth")) {
 		response = await authHandler(auth, request, env);
 	} else if (url.pathname.startsWith("/chat")) {

@@ -29,7 +29,21 @@
 	],
 	"vars": {
 		"CLIENT_PROD_URL": "https://woof-fe.pages.dev"
-	}
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "PETSITTER_DO",
+				"class_name": "PetsitterDO"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"new_sqlite_classes": ["PetsitterDO"],
+			"tag": "v1"
+		}
+	]
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
