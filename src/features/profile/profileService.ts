@@ -102,7 +102,7 @@ export const profileService = {
 
 		const query = `
 			INSERT INTO user 
-				(user_id, username, email, profile_image_url, latitude, longitude, description, is_petsitter)
+				(id, username, email, profile_image_url, latitude, longitude, description, is_petsitter)
 			VALUES 
 				(?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;
 			`;
@@ -167,7 +167,7 @@ export const profileService = {
 		values.push(userId);
 		const query = `UPDATE user SET ${fields.join(
 			", "
-		)}, last_updated = CURRENT_TIMESTAMP WHERE user_id = ?`;
+		)}, last_updated = CURRENT_TIMESTAMP WHERE id = ?`;
 		try {
 			await d1Service.executeQuery(query, values, env);
 			return true;
