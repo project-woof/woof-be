@@ -44,11 +44,8 @@ export class PetsitterDO extends DurableObject<Env> {
 	}
 
 	async fetch(request: Request): Promise<Response> {
-		const requestId = crypto.randomUUID().substring(0, 8);
 		console.log(
-			`[${requestId}] Received request: ${request.method} ${
-				new URL(request.url).pathname
-			}`
+			`Received request: ${request.method} ${new URL(request.url).pathname}`
 		);
 
 		try {
@@ -56,7 +53,7 @@ export class PetsitterDO extends DurableObject<Env> {
 			const queryUserId = url.searchParams.get("user_id");
 			if (queryUserId) {
 				this.userId = queryUserId;
-				console.log(`[${requestId}] User ID: ${this.userId}`);
+				console.log(`User ID: ${this.userId}`);
 			}
 
 			const upgradeHeader = request.headers.get("Upgrade");
@@ -75,7 +72,7 @@ export class PetsitterDO extends DurableObject<Env> {
 					this.lastActivity = Date.now();
 
 					console.log(
-						`[${requestId}] WebSocket connection established for user ${this.userId}`
+						`WebSocket connection established for user ${this.userId}`
 					);
 
 					server.addEventListener("message", (event) => {
@@ -105,7 +102,7 @@ export class PetsitterDO extends DurableObject<Env> {
 						webSocket: client,
 					});
 				} catch (error) {
-					console.error(`[${requestId}] Error setting up WebSocket:`, error);
+					console.error(`Error setting up WebSocket:`, error);
 					this.connectionState = "closed";
 					return new Response("Failed to set up WebSocket connection", {
 						status: 500,
@@ -117,7 +114,7 @@ export class PetsitterDO extends DurableObject<Env> {
 				try {
 					bodyText = await request.text();
 				} catch (e) {
-					console.error(`[${requestId}] Error reading request text:`, e);
+					console.error(`Error reading request text:`, e);
 					return new Response("Bad Request", { status: 400 });
 				}
 
@@ -125,9 +122,9 @@ export class PetsitterDO extends DurableObject<Env> {
 				if (bodyText.trim().length > 0) {
 					try {
 						data = JSON.parse(bodyText);
-						console.log(`[${requestId}] Received notification data:`, data);
+						console.log(`Received notification data:`, data);
 					} catch (e) {
-						console.error(`[${requestId}] JSON parse error:`, e);
+						console.error(`JSON parse error:`, e);
 						return new Response("Bad Request", { status: 400 });
 					}
 				}
@@ -137,13 +134,13 @@ export class PetsitterDO extends DurableObject<Env> {
 					return new Response("OK", { status: 200 });
 				} else {
 					console.warn(
-						`[${requestId}] Attempted to send notification but connection is ${this.connectionState}`
+						`Attempted to send notification but connection is ${this.connectionState}`
 					);
 					return new Response("No active connection", { status: 404 });
 				}
 			}
 		} catch (error) {
-			console.error(`[${requestId}] Unhandled error in fetch:`, error);
+			console.error(`Unhandled error in fetch:`, error);
 			return new Response("Internal Server Error", { status: 500 });
 		}
 	}
@@ -230,9 +227,9 @@ export class PetsitterDO extends DurableObject<Env> {
 		try {
 			console.log(`Subscribing user ${this.userId} to chat rooms`);
 			const query = `
-        SELECT room_id FROM chatroom
-        WHERE participant1_id = ? OR participant2_id = ?;
-      `;
+						SELECT room_id FROM chatroom
+						WHERE participant1_id = ? OR participant2_id = ?;
+					`;
 
 			const result = await this.executeDbQuery(() =>
 				this.env.PETSITTER_DB.prepare(query)
@@ -272,14 +269,11 @@ export class PetsitterDO extends DurableObject<Env> {
 		ws: WebSocket,
 		message: string | ArrayBuffer
 	): Promise<void> {
-		// Generate a unique ID for this message handling
-		const messageId = crypto.randomUUID().substring(0, 8);
-
 		try {
 			// Check connection health first
 			if (ws.readyState !== WebSocket.OPEN) {
 				console.warn(
-					`[${messageId}] Received message on non-open WebSocket (state: ${ws.readyState})`
+					`Received message on non-open WebSocket (state: ${ws.readyState})`
 				);
 				return;
 			}
@@ -288,8 +282,6 @@ export class PetsitterDO extends DurableObject<Env> {
 				typeof message === "string"
 					? message
 					: new TextDecoder().decode(message);
-
-			console.log(`[${messageId}] Processing message from user ${this.userId}`);
 
 			const clientMsg = JSON.parse(text);
 
@@ -310,12 +302,14 @@ export class PetsitterDO extends DurableObject<Env> {
 					);
 				});
 
+				console.log(`Sending message to room ${room_id} from user ${this.userId}`);
+
 				try {
 					// Check if the chat room exists with timeout and retry
 					const query = `
-            SELECT participant1_id, participant2_id FROM chatroom
-            WHERE room_id = ?;
-          `;
+								SELECT participant1_id, participant2_id FROM chatroom
+								WHERE room_id = ?;
+							`;
 
 					const chatroomPromise = this.executeDbQuery(() =>
 						this.env.PETSITTER_DB.prepare(query)
@@ -402,10 +396,7 @@ export class PetsitterDO extends DurableObject<Env> {
 
 						await Promise.race([notificationPromise, notificationTimeout]);
 					} catch (notifyError) {
-						console.error(
-							`[${messageId}] Failed to notify recipient:`,
-							notifyError
-						);
+						console.error(`Failed to notify recipient:`, notifyError);
 						recipientNotified = false;
 						// Continue anyway - the message is saved in the database
 					}
@@ -417,10 +408,7 @@ export class PetsitterDO extends DurableObject<Env> {
 						recipientNotified,
 					});
 				} catch (dbError) {
-					console.error(
-						`[${messageId}] Database or notification error:`,
-						dbError
-					);
+					console.error(`Database or notification error:`, dbError);
 					this.safeSend({
 						type: "error",
 						message:
@@ -433,9 +421,9 @@ export class PetsitterDO extends DurableObject<Env> {
 				this.safeSend({ type: "error", message: "Unknown action." });
 			}
 		} catch (error) {
-			console.error(`[${messageId}] Error in webSocketMessage:`, error);
+			console.error(`Error in webSocketMessage:`, error);
 			console.error(
-				`[${messageId}] Stack trace:`,
+				`Stack trace:`,
 				error instanceof Error ? error.stack : "No stack trace"
 			);
 
@@ -450,10 +438,7 @@ export class PetsitterDO extends DurableObject<Env> {
 					ws.send(JSON.stringify({ type: "error", message: errorMessage }));
 				}
 			} catch (sendError) {
-				console.error(
-					`[${messageId}] Failed to send error message:`,
-					sendError
-				);
+				console.error(`Failed to send error message:`, sendError);
 			}
 		}
 	}
