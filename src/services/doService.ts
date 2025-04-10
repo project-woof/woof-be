@@ -7,6 +7,26 @@ export class PetsitterDO extends DurableObject<Env> {
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
+		this.ctx.storage.setAlarm(Date.now() + 60000);
+	}
+
+	async alarm(): Promise<void> {
+		// Check if connection is still alive
+		if (this.connection && this.connection.readyState === WebSocket.OPEN) {
+			try {
+				this.connection.send(JSON.stringify({ type: "heartbeat" }));
+				// Schedule the next alarm
+				this.ctx.storage.setAlarm(Date.now() + 60000);
+			} catch (error) {
+				console.error("Error sending heartbeat, closing connection:", error);
+				try {
+					this.connection.close(1011, "Heartbeat failed");
+				} catch (e) {
+					console.error("Error closing connection:", e);
+				}
+				this.connection = null;
+			}
+		}
 	}
 
 	async fetch(request: Request): Promise<Response> {
@@ -166,6 +186,9 @@ export class PetsitterDO extends DurableObject<Env> {
 		wasClean: boolean
 	): Promise<void> {
 		console.log(`WebSocket closed for user ${this.userId}: ${code} ${reason}`);
+		if (!wasClean) {
+			console.warn(`Abnormal WebSocket closure for user ${this.userId}`);
+		}
 		this.connection = null;
 	}
 
