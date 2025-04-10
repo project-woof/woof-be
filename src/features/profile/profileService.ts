@@ -11,6 +11,8 @@ export const profileService = {
 
 	// Get a petsitter profile by user ID
 	getPetsitterProfileById: async (
+		userLat: number,
+		userLon: number,
 		userId: string,
 		env: Env
 	): Promise<PetsitterProfile[]> => {
@@ -20,11 +22,15 @@ export const profileService = {
 						petsitter.sum_of_rating,
 						petsitter.price,
 						petsitter.description AS petsitter_description,
-						petsitter.service_tags
+						petsitter.service_tags,
+						sqrt(
+							(user.latitude - ?)*(user.latitude - ?) +
+							(user.longitude - ?)*(user.longitude - ?)
+						) AS distance
 					FROM user
 					INNER JOIN petsitter ON user.id = petsitter.id
 					WHERE user.id = ?;`;
-		return await d1Service.executeQuery<PetsitterProfile>(query, [userId], env);
+		return await d1Service.executeQuery<PetsitterProfile>(query, [userLat, userLat, userLon, userLon, userId], env);
 	},
 
 	// Get a list of petsitter profiles including profile_image with pagination
