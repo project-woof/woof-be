@@ -1,4 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
+import { chatService } from "@/features/chat/chatService";
 
 export class PetsitterDO extends DurableObject<Env> {
 	connection: WebSocket | null = null;
@@ -94,13 +95,7 @@ export class PetsitterDO extends DurableObject<Env> {
 					: new TextDecoder().decode(message);
 			const clientMsg = JSON.parse(text);
 			if (clientMsg.action === "send_message") {
-				const {
-					room_id,
-					message: content,
-					message_id,
-					created_at,
-					sender_id,
-				} = clientMsg;
+				const { room_id, message: content } = clientMsg;
 				const query = `
 						SELECT participant1_id, participant2_id FROM chatroom
 						WHERE room_id = ?;
@@ -117,6 +112,21 @@ export class PetsitterDO extends DurableObject<Env> {
 					);
 					return;
 				}
+				const body = {
+					room_id,
+					sender_id: this.userId,
+					text: content,
+				};
+				const response = await chatService.addMessageToChatRoom(body, this.env);
+				if (!response) {
+					ws.send(
+						JSON.stringify({
+							type: "error",
+							message: "Failed to send message.",
+						})
+					);
+					return;
+				}
 				const recipientId =
 					chatroom.participant1_id === this.userId
 						? chatroom.participant2_id
@@ -124,10 +134,10 @@ export class PetsitterDO extends DurableObject<Env> {
 				const serverMsg = {
 					type: "message",
 					room_id,
-					message_id,
-					sender_id: sender_id,
+					message_id: response[0].message_id,
+					sender_id: this.userId,
 					message: content,
-					created_at,
+					created_at: response[0].created_at,
 				};
 				const recipientIdObj = this.env.PETSITTER_DO.idFromName(recipientId);
 				await this.env.PETSITTER_DO.get(recipientIdObj).fetch(
