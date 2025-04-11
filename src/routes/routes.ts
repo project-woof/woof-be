@@ -9,6 +9,7 @@ import { notificationHandler } from "@/features/notification/notificationHandler
 import { authMiddleware } from "@/middleware/authMiddleware";
 import { protectedRoutes } from "./protected";
 import { betterAuth } from "better-auth";
+import { imageHandler } from "@/features/image/imageHandler";
 
 export const handleRequest = async (
 	request: Request,
@@ -50,6 +51,8 @@ export const handleRequest = async (
 		response = await reviewHandler(request, env);
 	} else if (url.pathname.startsWith("/notification")) {
 		response = await notificationHandler(request, env);
+	} else if (url.pathname.startsWith("/image")) {
+		response = await imageHandler(request, env);
 	} else {
 		response = new Response("Not Found", { status: 404 });
 	}
