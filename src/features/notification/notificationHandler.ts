@@ -19,7 +19,7 @@ export const notificationHandler = async (
 			userId,
 			env
 		);
-		return new Response(JSON.stringify(notifications), { status: 201 });
+		return new Response(JSON.stringify(notifications), { status: 200 });
 	}
 
 	if (
