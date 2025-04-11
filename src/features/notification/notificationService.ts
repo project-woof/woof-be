@@ -5,7 +5,7 @@ import { generateUUID } from "@/utils/uuid";
 export const notificationService = {
 	// Get notifications by user_id
 	getNotifications: async (userId: string, env: Env): Promise<any[]> => {
-		const query = `SELECT * FROM notifications WHERE user_id = ?;`;
+		const query = `SELECT * FROM notification WHERE user_id = ?;`;
 		return await d1Service.executeQuery(query, [userId], env);
 	},
 
@@ -30,7 +30,7 @@ export const notificationService = {
 		}
 
 		const insertQuery = `
-						INSERT INTO notifications 
+						INSERT INTO notification 
 							(notification_id, user_id, sender_id, room_id, notification_type)
 						VALUES 
 							(?, ?, ?, ?, ?)
@@ -48,7 +48,7 @@ export const notificationService = {
 		roomId: string,
 		env: Env
 	): Promise<any> => {
-		const query = `DELETE FROM notifications WHERE room_id = ?;`;
+		const query = `DELETE FROM notification WHERE room_id = ?;`;
 		return await d1Service.executeQuery(query, [roomId], env);
 	},
 
@@ -57,7 +57,7 @@ export const notificationService = {
 		userId: string,
 		env: Env
 	): Promise<any> => {
-		const query = `DELETE FROM notifications WHERE user_id = ?;`;
+		const query = `DELETE FROM notification WHERE user_id = ?;`;
 		return await d1Service.executeQuery(query, [userId], env);
 	},
 };
