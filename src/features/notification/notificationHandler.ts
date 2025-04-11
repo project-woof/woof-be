@@ -23,6 +23,24 @@ export const notificationHandler = async (
 	}
 
 	if (
+		url.pathname.startsWith("/notification/createNotification/") &&
+		request.method === "POST"
+	) {
+		const body = await request.json();
+		if (!body) {
+			return new Response("Body is required", { status: 400 });
+		}
+		const notification = await notificationService.createNotification(
+			body,
+			env
+		);
+		if (!notification || notification.length === 0) {
+			return new Response("Notification Not Created", { status: 400 });
+		}
+		return new Response(JSON.stringify(notification[0]), { status: 201 });
+	}
+
+	if (
 		url.pathname.startsWith("/notification/clearNotifications/") &&
 		request.method === "DELETE"
 	) {
