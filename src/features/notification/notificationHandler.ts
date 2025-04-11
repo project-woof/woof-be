@@ -58,6 +58,24 @@ export const notificationHandler = async (
 		return new Response("Notifications Deleted Successfully", { status: 200 });
 	}
 
+	if (
+		url.pathname.startsWith("/notification/clearAllNotifications/") &&
+		request.method === "DELETE"
+	) {
+		const userId = url.pathname.split("/").pop();
+		if (!userId) {
+			return new Response("User ID is required", { status: 400 });
+		}
+		const response = await notificationService.deleteAllNotificationsByUserId(
+			userId,
+			env
+		);
+		if (!response || response.changes === 0) {
+			return new Response("Notifications Not Deleted", { status: 400 });
+		}
+		return new Response("Notifications Deleted Successfully", { status: 200 });
+	}
+
 	// Notification API Endpoint Not Found
 	return new Response("Notification API Endpoint Not Found", { status: 404 });
 };

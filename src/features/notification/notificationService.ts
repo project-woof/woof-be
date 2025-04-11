@@ -9,6 +9,7 @@ export const notificationService = {
 		return await d1Service.executeQuery(query, [userId], env);
 	},
 
+	// Create notification based on notification type and existence
 	createNotification: async (body: any, env: Env): Promise<Notification[]> => {
 		const notification_id = generateUUID("notification");
 		const { user_id, sender_id, room_id, notification_type } = body;
@@ -42,12 +43,21 @@ export const notificationService = {
 		);
 	},
 
-	// Delete notifications by room_id
+	// Delete notifications by roomId
 	deleteNotificationsByRoomId: async (
 		roomId: string,
 		env: Env
 	): Promise<any> => {
 		const query = `DELETE FROM notifications WHERE room_id = ?;`;
 		return await d1Service.executeQuery(query, [roomId], env);
+	},
+
+	// Delete all notifications by userId
+	deleteAllNotificationsByUserId: async (
+		userId: string,
+		env: Env
+	): Promise<any> => {
+		const query = `DELETE FROM notifications WHERE user_id = ?;`;
+		return await d1Service.executeQuery(query, [userId], env);
 	},
 };
