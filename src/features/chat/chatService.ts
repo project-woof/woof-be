@@ -141,7 +141,7 @@ export const chatService = {
 						last_updated = CURRENT_TIMESTAMP
 					WHERE room_id = ?
 				`;
-				await d1Service.executeQuery(updateQuery, [text, room_id], env);
+				d1Service.executeQuery(updateQuery, [text, room_id], env);
 			}
 
 			return message;
