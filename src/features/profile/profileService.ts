@@ -11,6 +11,8 @@ export const profileService = {
 
 	// Get a petsitter profile by user ID
 	getPetsitterProfileById: async (
+		userLat: number,
+		userLon: number,
 		userId: string,
 		env: Env
 	): Promise<PetsitterProfile[]> => {
@@ -20,11 +22,15 @@ export const profileService = {
 						petsitter.sum_of_rating,
 						petsitter.price,
 						petsitter.description AS petsitter_description,
-						petsitter.service_tags
+						petsitter.service_tags,
+						sqrt(
+							(user.latitude - ?)*(user.latitude - ?) +
+							(user.longitude - ?)*(user.longitude - ?)
+						) AS distance
 					FROM user
 					INNER JOIN petsitter ON user.id = petsitter.id
 					WHERE user.id = ?;`;
-		return await d1Service.executeQuery<PetsitterProfile>(query, [userId], env);
+		return await d1Service.executeQuery<PetsitterProfile>(query, [userLat, userLat, userLon, userLon, userId], env);
 	},
 
 	// Get a list of petsitter profiles including profile_image with pagination
@@ -133,73 +139,107 @@ export const profileService = {
 		data: Partial<PetsitterProfile>,
 		env: Env
 	): Promise<boolean> => {		
-		if (
-			(data.is_petsitter !== undefined || data.is_petsitter === 1) &&
-			data.price === undefined 
-		) {
-			throw new Error("Missing required petsitter fields: price");
-		}
-		const fields: string[] = [];
-		const values: any[] = [];
-		if (data.username !== undefined) {
-			fields.push("username = ?");
-			values.push(data.username);
-		}
-		if (data.email !== undefined) {
-			fields.push("email = ?");
-			values.push(data.email);
-		}
-		if (data.profile_image_url !== undefined) {
-			fields.push("profile_image_url = ?");
-			values.push(data.profile_image_url);
-		}
-		if (data.latitude !== undefined) {
-			fields.push("latitude = ?");
-			values.push(data.latitude);
-		}
-		if (data.longitude !== undefined) {
-			fields.push("longitude = ?");
-			values.push(data.longitude);
-		}
-		if (data.description !== undefined) {
-			fields.push("description = ?");
-			values.push(data.description);
-		}
-		if (data.is_petsitter !== undefined) {
-			fields.push("is_petsitter = ?");
-			values.push(data.is_petsitter);
-		}
-		if (fields.length === 0) return false;
-		values.push(userId);
-		const query = `UPDATE user SET ${fields.join(
-			", "
-		)}, last_updated = CURRENT_TIMESTAMP WHERE id = ?`;
 		try {
-			await d1Service.executeQuery(query, values, env);
-
-			if (data.is_petsitter === undefined || data.is_petsitter === 0){
-				return true
+			// First, update the user table
+			const userFields: string[] = [];
+			const userValues: any[] = [];
+			
+			if (data.username !== undefined) {
+				userFields.push("username = ?");
+				userValues.push(data.username);
+			}
+			if (data.email !== undefined) {
+				userFields.push("email = ?");
+				userValues.push(data.email);
+			}
+			if (data.profile_image_url !== undefined) {
+				userFields.push("profile_image_url = ?");
+				userValues.push(data.profile_image_url);
+			}
+			if (data.latitude !== undefined) {
+				userFields.push("latitude = ?");
+				userValues.push(data.latitude);
+			}
+			if (data.longitude !== undefined) {
+				userFields.push("longitude = ?");
+				userValues.push(data.longitude);
+			}
+			if (data.description !== undefined) {
+				userFields.push("description = ?");
+				userValues.push(data.description);
+			}
+			if (data.is_petsitter !== undefined) {
+				userFields.push("is_petsitter = ?");
+				userValues.push(data.is_petsitter);
+			}
+			
+			// Update user table if there are user fields to update
+			if (userFields.length > 0) {
+				userValues.push(userId);
+				const userQuery = `UPDATE user SET ${userFields.join(
+					", "
+				)}, last_updated = CURRENT_TIMESTAMP WHERE id = ?`;
+				await d1Service.executeQuery(userQuery, userValues, env);
 			}
 
-			const insertQuery = `
-			INSERT INTO petsitter (id, total_reviews, sum_of_rating, price, description, service_tags)
-			VALUES (?, ?, ?, ?, ?, ?) RETURNING *;
-			`;
+			// If not a petsitter or no petsitter-specific fields to update, we're done
+			if (data.is_petsitter === 0 || 
+				(data.price === undefined && 
+				 data.petsitter_description === undefined && 
+				 data.service_tags === undefined)) {
+				return true;
+			}
 
-			const params = [
-				userId,
-				0,
-				0,
-				data.price,
-				data.petsitter_description || "",
-				data.service_tags || "[]"
-			]
-			
-			await d1Service.executeQuery(
-				insertQuery,
-				params,
-				env
-			)
+			// Check if petsitter record exists
+			const checkQuery = "SELECT id FROM petsitter WHERE id = ?";
+			const existingPetsitter = await d1Service.executeQuery(checkQuery, [userId], env);
+			const petsitterExists = existingPetsitter.length > 0;
+
+			// Process petsitter-specific fields
+			if (petsitterExists) {
+				// Update existing petsitter record
+				const petsitterFields: string[] = [];
+				const petsitterValues: any[] = [];
+				
+				if (data.price !== undefined) {
+					petsitterFields.push("price = ?");
+					petsitterValues.push(data.price);
+				}
+				
+				if (data.petsitter_description !== undefined) {
+					petsitterFields.push("description = ?");
+					petsitterValues.push(data.petsitter_description);
+				}
+				
+				if (data.service_tags !== undefined) {
+					petsitterFields.push("service_tags = ?");
+					petsitterValues.push(JSON.stringify(data.service_tags));
+				}
+				
+				if (petsitterFields.length > 0) {
+					petsitterValues.push(userId);
+					const updateQuery = `UPDATE petsitter SET ${petsitterFields.join(
+						", "
+					)}, last_updated = CURRENT_TIMESTAMP WHERE id = ?`;
+					await d1Service.executeQuery(updateQuery, petsitterValues, env);
+				}
+			} else {
+				// Create new petsitter record
+				const insertQuery = `
+				INSERT INTO petsitter (id, total_reviews, sum_of_rating, price, description, service_tags)
+				VALUES (?, ?, ?, ?, ?, ?)`;
+
+				const params = [
+					userId,
+					0,
+					0,
+					data.price || 25, // Default price if not provided
+					data.petsitter_description || "",
+					JSON.stringify(data.service_tags || [])
+				];
+				
+				await d1Service.executeQuery(insertQuery, params, env);
+			}
 			
 			return true;
 		} catch (error) {

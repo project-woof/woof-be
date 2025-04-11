@@ -32,7 +32,21 @@ export const profileHandler = async (
 		if (!userId) {
 			return new Response("User ID is required", { status: 400 });
 		}
+		const { searchParams } = new URL(request.url);
+		const DEFAULT_USER_LAT = 37.7749; // San Francisco (Golden Gate City :O)
+		const DEFAULT_USER_LON = -122.4194;
+
+		// Get latitude and longitude from query parameters
+		const userLat = parseFloat(
+			searchParams.get("userLat") ?? DEFAULT_USER_LAT.toString()
+		);
+		const userLon = parseFloat(
+			searchParams.get("userLon") ?? DEFAULT_USER_LON.toString()
+		);
+		
 		const petsitterProfile = await profileService.getPetsitterProfileById(
+			userLat,
+			userLon,
 			userId,
 			env
 		);

@@ -57,7 +57,8 @@ export const reviewService = {
 		);
 	},
 
-	// Create a new review
+	// Create a new 
+	// TODO: check end date before u can create review
 	createReview: async (body: any, env: Env): Promise<Review[]> => {
 		const review_id = generateUUID("review");
 		const { reviewer_id, reviewee_id, rating, comment } = body;
@@ -66,11 +67,26 @@ export const reviewService = {
       VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *;
     `;
 		try {
-			return await d1Service.executeQuery<Review>(
+			const newReview = await d1Service.executeQuery<Review>(
 				query,
 				[review_id, reviewer_id, reviewee_id, rating, comment],
 				env
 			);
+			const updateQuery = `
+			UPDATE petsitter
+			SET 
+				total_reviews = total_reviews + 1,
+				sum_of_rating = sum_of_rating + ?
+			WHERE id = ?;
+			`;
+
+			await d1Service.executeQuery<Review>(
+				updateQuery,
+				[rating, reviewee_id],
+				env
+			);
+
+			return newReview
 		} catch (error) {
 			console.error("Error inserting review:", error);
 			throw error;
