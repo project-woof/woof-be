@@ -9,7 +9,10 @@ import {
 
 export const chatService = {
 	// Get chat room by participant IDs
-	getChatRoomByParticipantIds: async (body: any, env: Env): Promise<ChatRoom[]> => {
+	getChatRoomByParticipantIds: async (
+		body: any,
+		env: Env
+	): Promise<ChatRoom[]> => {
 		const { participant1_id, participant2_id } = body;
 		const query = `
 					SELECT *
@@ -49,6 +52,10 @@ export const chatService = {
 	): Promise<ChatRoomSummary[]> => {
 		const query = `SELECT 
 					c.room_id,
+					CASE
+						WHEN c.participant1_id = ? THEN u2.id 
+						ELSE u1.id
+					END as user_id,
 					CASE 
 						WHEN c.participant1_id = ? THEN u2.username 
 						ELSE u1.username 
@@ -67,7 +74,7 @@ export const chatService = {
 					`;
 		return await d1Service.executeQuery<ChatRoomSummary>(
 			query,
-			[user_id, user_id, user_id, user_id],
+			[user_id, user_id, user_id, user_id, user_id],
 			env
 		);
 	},
