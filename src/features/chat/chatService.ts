@@ -55,7 +55,7 @@ export const chatService = {
 					CASE
 						WHEN c.participant1_id = ? THEN u2.id 
 						ELSE u1.id
-					END as user_id
+					END as user_id,
 					CASE 
 						WHEN c.participant1_id = ? THEN u2.username 
 						ELSE u1.username 

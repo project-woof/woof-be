@@ -23,7 +23,7 @@ export const notificationHandler = async (
 	}
 
 	if (
-		url.pathname.startsWith("/notification/createNotification/") &&
+		url.pathname.startsWith("/notification/createNotification") &&
 		request.method === "POST"
 	) {
 		const body = await request.json();
