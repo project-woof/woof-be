@@ -1,20 +1,5 @@
-export const getImage = async (key: string, env: Env): Promise<Response> => {
-	const object = await env.PETSITTER_STORAGE.get(key);
-
-	if (!object) {
-		return new Response("Image not found", { status: 404 });
-	}
-
-	return new Response(object.body, {
-		headers: {
-			"Content-Type": "image/png",
-			"Cache-Control": "public, max-age=3600",
-		},
-	});
-   
-};
 export const r2Service = {
-	get: async (key: string, env: Env): Promise<R2ObjectBody | null> => {
+    get: async (key: string, env: Env): Promise<R2ObjectBody | null> => {
         try {
             return await env.PETSITTER_STORAGE.get(key);
         } catch (error) {
@@ -22,8 +7,21 @@ export const r2Service = {
             return null;
         }
     },
+    
+    list: async (prefix: string, env: Env): Promise<R2Objects> => {
+        try {
+            return await env.PETSITTER_STORAGE.list({prefix: `${prefix}`,});
+        } catch (error) {
+            console.error(`Failed to get object with prefix "${prefix}":`, error);
+            return {
+                objects: [],
+                delimitedPrefixes: [],
+                truncated: false,
+            } as R2Objects;
+        }
+    },
 
-	put: async (key: string, file: any, env: Env): Promise<R2Object | null> => {
+    put: async (key: string, file: Blob | string, env: Env): Promise<R2Object | null> => {
         try {
             return await env.PETSITTER_STORAGE.put(key, file);
         } catch (error) {

@@ -13,6 +13,8 @@ export const protectedRoutes = [
 	{ path: "/chat", method: "POST" },
 	{ path: "/chat", method: "PUT" },
 	{ path: "/chat", method: "DELETE" },
+	// { path: "/image", method: "POST" },
+	// { path: "/image", method: "DELETE" },
 	{ path: "/notification", method: "GET" },
 	{ path: "/notification", method: "POST" },
 	{ path: "/notification", method: "PUT" },
