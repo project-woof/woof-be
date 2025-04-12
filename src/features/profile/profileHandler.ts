@@ -43,7 +43,7 @@ export const profileHandler = async (
 		const userLon = parseFloat(
 			searchParams.get("userLon") ?? DEFAULT_USER_LON.toString()
 		);
-		
+
 		const petsitterProfile = await profileService.getPetsitterProfileById(
 			userLat,
 			userLon,
@@ -56,7 +56,7 @@ export const profileHandler = async (
 		return new Response(JSON.stringify(petsitterProfile[0]), { status: 200 });
 	}
 
-	// Get list of petsitters
+	// Updated handler in profileHandler.ts
 	if (
 		url.pathname.startsWith("/profile/getPetsitterList") &&
 		request.method === "GET"
@@ -75,12 +75,46 @@ export const profileHandler = async (
 		const limit = parseInt(searchParams.get("limit") ?? "15", 10);
 		const offset = parseInt(searchParams.get("offset") ?? "0", 10);
 
+		// Prepare filters
+		const filters: {
+			distance?: number;
+			priceMin?: number;
+			priceMax?: number;
+			services?: string[];
+			sortBy?: "distance" | "reviews" | "rating";
+		} = {};
+
+		// Distance filter
+		const distance = searchParams.get("distance");
+		if (distance) {
+			filters.distance = parseFloat(distance);
+		}
+
+		// Price range filter
+		const priceMin = searchParams.get("priceMin");
+		const priceMax = searchParams.get("priceMax");
+		if (priceMin) filters.priceMin = parseFloat(priceMin);
+		if (priceMax) filters.priceMax = parseFloat(priceMax);
+
+		// Services filter
+		const services = searchParams.get("services");
+		if (services) {
+			filters.services = services.split(",");
+		}
+
+		// Sort by filter
+		const sortBy = searchParams.get("sortBy");
+		if (sortBy && ["distance", "reviews", "rating"].includes(sortBy)) {
+			filters.sortBy = sortBy as "distance" | "reviews" | "rating";
+		}
+
 		try {
 			const petsitters = await profileService.getPetsitterList(
 				userLat,
 				userLon,
 				limit,
 				offset,
+				filters,
 				env
 			);
 			return new Response(JSON.stringify(petsitters), {
