@@ -1,4 +1,5 @@
 import { r2Service } from "@/services/r2Service";
+import { generateUUID } from "@/utils/uuid";
 
 export const imageService = {
     // Get a image by key
@@ -30,13 +31,10 @@ export const imageService = {
         files: Blob[],
         env: Env
     ): Promise<string[]> => {
-        const existing = await r2Service.list(`${userId}/petsitter/`, env);
-        const currentCount = existing.objects.length;
-
         const keys: string[] = [];
 
         for (let i = 0; i < files.length; i++) {
-            const index = currentCount + i + 1;
+            const index = generateUUID("img");
             const key = `${userId}/petsitter/${index}`;
             const uploaded = await r2Service.put(key, files[i], env);
             if (uploaded) {
