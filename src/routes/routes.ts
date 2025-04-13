@@ -1,5 +1,6 @@
 import { healthCheck } from "@/utils/health";
 import { handleCORS, addCORSHeaders } from "@/utils/cors";
+import { pollHandler } from "@/features/poll/pollHandler";
 import { authHandler } from "@/features/auth/authHandler";
 import { chatHandler } from "@/features/chat/chatHandler";
 import { bookingHandler } from "@/features/booking/bookingHandler";
@@ -39,6 +40,11 @@ export const handleRequest = async (
 
 	if (url.pathname.startsWith("/health")) {
 		response = await healthCheck(env);
+	} else if (
+		url.pathname.startsWith("/poll") ||
+		url.pathname.startsWith("/new")
+	) {
+		response = await pollHandler(request, env);
 	} else if (url.pathname.startsWith("/api/auth")) {
 		response = await authHandler(auth, request, env);
 	} else if (url.pathname.startsWith("/chat")) {

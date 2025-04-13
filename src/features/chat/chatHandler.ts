@@ -1,4 +1,5 @@
 import { chatService } from "./chatService";
+import { notifyLongPoll } from "@/utils/notify";
 
 export const chatHandler = async (
 	request: Request,
@@ -63,6 +64,10 @@ export const chatHandler = async (
 			if (message.length === 0) {
 				return new Response("Message Not Created", { status: 400 });
 			}
+			const { recipient_id } = body as any;
+			notifyLongPoll(env, recipient_id, "messages").catch((error) => {
+				console.error("Long poll message error:", error);
+			});
 			return new Response(JSON.stringify(message[0]), { status: 201 });
 		} catch (error) {
 			console.error("Error creating message:", error);

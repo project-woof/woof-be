@@ -2,6 +2,7 @@
 
 import { handleRequest } from "@/routes/routes";
 import { serverAuth } from "@/utils/auth";
+export { PetsitterDO } from "@/services/doService";
 
 export default {
 	async fetch(

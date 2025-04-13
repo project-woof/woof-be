@@ -19,4 +19,6 @@ export const protectedRoutes = [
 	{ path: "/notification", method: "POST" },
 	{ path: "/notification", method: "PUT" },
 	{ path: "/notification", method: "DELETE" },
+	{ path: "/poll", method: "GET" },
+	{ path: "/new", method: "GET" },
 ];

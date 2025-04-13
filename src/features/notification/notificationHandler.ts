@@ -1,3 +1,4 @@
+import { notifyLongPoll } from "@/utils/notify";
 import { notificationService } from "./notificationService";
 
 export const notificationHandler = async (
@@ -22,6 +23,7 @@ export const notificationHandler = async (
 		return new Response(JSON.stringify(notifications), { status: 200 });
 	}
 
+	// Create new notification
 	if (
 		url.pathname.startsWith("/notification/createNotification") &&
 		request.method === "POST"
@@ -37,9 +39,14 @@ export const notificationHandler = async (
 		if (!notification || notification.length === 0) {
 			return new Response("Notification Not Created", { status: 400 });
 		}
+		const { user_id } = body as any;
+		notifyLongPoll(env, user_id, "notifications").catch((error) => {
+			console.error("Long poll notification error:", error);
+		});
 		return new Response(JSON.stringify(notification[0]), { status: 201 });
 	}
 
+	// Clear notifications by roomId
 	if (
 		url.pathname.startsWith("/notification/clearNotifications/") &&
 		request.method === "DELETE"
@@ -58,6 +65,7 @@ export const notificationHandler = async (
 		return new Response("Notifications Deleted Successfully", { status: 200 });
 	}
 
+	// Clear all notifications
 	if (
 		url.pathname.startsWith("/notification/clearAllNotifications/") &&
 		request.method === "DELETE"
