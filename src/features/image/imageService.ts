@@ -30,10 +30,10 @@ export const imageService = {
         files: Blob[],
         env: Env
     ): Promise<string[]> => {
+        const keys: string[] = [];
         const existing = await r2Service.list(`${userId}/petsitter/`, env);
         const currentCount = existing.objects.length;
 
-        const keys: string[] = [];
 
         for (let i = 0; i < files.length; i++) {
             const index = currentCount + i + 1;
