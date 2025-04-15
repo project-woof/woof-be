@@ -5,7 +5,12 @@ import { generateUUID } from "@/utils/uuid";
 export const notificationService = {
 	// Get notifications by user_id
 	getNotifications: async (userId: string, env: Env): Promise<any[]> => {
-		const query = `SELECT * FROM notification WHERE user_id = ?;`;
+		const query = `
+					SELECT n.*, u.username
+					FROM notification n
+					INNER JOIN user u ON n.sender_id = u.id
+					WHERE n.user_id = ?;
+				`;
 		return await d1Service.executeQuery(query, [userId], env);
 	},
 
