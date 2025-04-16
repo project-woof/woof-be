@@ -31,13 +31,11 @@ export const imageService = {
         env: Env
     ): Promise<string[]> => {
         const keys: string[] = [];
-        const existing = await r2Service.list(`${userId}/petsitter/`, env);
-        const currentCount = existing.objects.length;
-
+        let currentCount = 0;
 
         for (let i = 0; i < files.length; i++) {
-            const index = currentCount + i + 1;
-            const key = `${userId}/petsitter/${index}`;
+            currentCount++
+            const key = `${userId}/petsitter/${currentCount}`;
             const uploaded = await r2Service.put(key, files[i], env);
             if (uploaded) {
                 keys.push(key);
