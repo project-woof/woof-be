@@ -30,12 +30,12 @@ export const r2Service = {
         }
     },
 
-	delete: async (key: string, env: Env): Promise<boolean> => {
+	delete: async (keys: string[], env: Env): Promise<boolean> => {
 		try {
-			await env.PETSITTER_STORAGE.delete(key);
+			await env.PETSITTER_STORAGE.delete(keys);
 			return true;
 		} catch (error) {
-			console.error(`Failed to delete key "${key}":`, error);
+			console.error(`Failed to delete keys "${keys}":`, error);
 			return false;
 		}
 	},
