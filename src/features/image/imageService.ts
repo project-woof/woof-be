@@ -33,7 +33,7 @@ export const imageService = {
         const keys: string[] = [];
         let currentCount = 0;
 
-        for (let i = 0; i < files.length; i++) {
+        for (let i = 0; i < files.length || i < 6; i++) {
             currentCount++
             const key = `${userId}/petsitter/${currentCount}`;
             const uploaded = await r2Service.put(key, files[i], env);
