@@ -28,12 +28,27 @@ export const imageHandler = async (
         });
     }
 
-    // GET images keys by user ID (list of image keys)
+    // GET profile keys by user ID
     if (
-        url.pathname.startsWith("/image/getByUserId/") &&
+        url.pathname.startsWith("/image/getProfileByUserId/") &&
         request.method === "GET"
     ) {
-        const userId = url.pathname.replace("/image/getByUserId/", "");
+        const userId = url.pathname.replace("/image/getProfileByUserId/", "");
+        if (!userId) {
+            return new Response("User ID is required", { status: 400 });
+        }
+
+        const keys = await imageService.getProfileKeysByUserId(userId, env);
+
+        return Response.json({ images: keys }, { status: 200 });
+    }
+
+    // GET petsitter images keys by user ID (list of image keys)
+    if (
+        url.pathname.startsWith("/image/getPetsitterImagesByUserId/") &&
+        request.method === "GET"
+    ) {
+        const userId = url.pathname.replace("/image/getPetsitterImagesByUserId/", "");
         if (!userId) {
             return new Response("User ID is required", { status: 400 });
         }

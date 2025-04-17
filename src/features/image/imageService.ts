@@ -6,9 +6,16 @@ export const imageService = {
         return await r2Service.get(key, env)
     },
 
-    // Get images by user id
+    // Get petsitter images by user id
     getImageKeysByUserId: async (userId: string, env: Env): Promise<string[]> => {
-        const list = await r2Service.list(`${userId}/`, env)
+        const list = await r2Service.list(`${userId}/petsitter/`, env)
+
+        return list.objects.map((obj) => obj.key);
+    },
+    
+    // Get profile key by user id
+    getProfileKeysByUserId: async (userId: string, env: Env): Promise<string[]> => {
+        const list = await r2Service.list(`${userId}/profile-image`, env)
 
         return list.objects.map((obj) => obj.key);
     },
@@ -42,7 +49,7 @@ export const imageService = {
         );
     
         // Delete only non-preserved images
-        const existing = await r2Service.list(userId, env);
+        const existing = await r2Service.list(`${userId}/petsitter/`, env);
         if (existing.objects.length > 0) {
             const deleteKeys = existing.objects
                 .map((obj) => obj.key)
