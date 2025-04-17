@@ -6,7 +6,14 @@ export const profileService = {
 	// Get a profile by user ID
 	getProfileById: async (userId: string, env: Env): Promise<User[]> => {
 		const query = "SELECT * FROM user WHERE id = ?";
-		return await d1Service.executeQuery<User>(query, [userId], env);
+		const profile = await d1Service.executeQuery<User>(query, [userId], env);
+		const imageKey = `${userId}/profile-image`;
+		const enrichedProfile = profile.map((petsitter) => ({
+			...petsitter,
+			profile_image_url: imageKey,
+		}));
+
+		return enrichedProfile;
 	},
 
 	// Get a petsitter profile by user ID
