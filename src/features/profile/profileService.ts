@@ -159,7 +159,7 @@ export const profileService = {
 		const enrichedProfile = profile.map((petsitter) => ({
 			...petsitter,
 			profile_image_url: `${petsitter.id}/profile-image`,
-			first_image: `${petsitter.id}/petsitter-image/${petsitter.first_image}`,
+			first_image: `${petsitter.id}/petsitter/1`,
 		}));
 
 		return enrichedProfile;
