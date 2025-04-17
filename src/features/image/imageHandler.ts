@@ -88,14 +88,17 @@ export const imageHandler = async (
             if (typeof preserveRaw === "string") {
                 try {
                     preserve = JSON.parse(preserveRaw);
-                    keys = await imageService.createPetsitterImages(userId, files, preserve, env);
                 } catch (error) {
                     console.error("Invalid JSON for 'preserve'", error);
                     return new Response("Invalid preserve format", { status: 400 });
                 }
-            } else if (files.length === 0) {
+            }
+        
+            if (files.length === 0 && preserve.length === 0) {
                 return new Response("No image files or preserve data provided.", { status: 400 });
             }
+        
+            keys = await imageService.createPetsitterImages(userId, files, preserve, env);
         } else {
             if (files.length === 0) {
                 return new Response("No image file uploaded for profile type", { status: 400 });
