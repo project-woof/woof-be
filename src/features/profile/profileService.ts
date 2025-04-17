@@ -30,11 +30,19 @@ export const profileService = {
 					FROM user
 					INNER JOIN petsitter ON user.id = petsitter.id
 					WHERE user.id = ?;`;
-		return await d1Service.executeQuery<PetsitterProfile>(
+		const profile = await d1Service.executeQuery<PetsitterProfile>(
 			query,
 			[userLat, userLat, userLon, userLon, userId],
 			env
 		);
+
+		const imageKey = `${userId}/profile-image`;
+		const enrichedProfile = profile.map((petsitter) => ({
+			...petsitter,
+			profile_image_url: imageKey,
+		}));
+
+		return enrichedProfile;
 	},
 
 	// Updated getPetsitterList function in profileService.ts
@@ -142,11 +150,18 @@ export const profileService = {
 		query += ` LIMIT ? OFFSET ?`;
 		queryParams.push(limit, offset);
 
-		return await d1Service.executeQuery<PetsitterProfile>(
+		const profile = await d1Service.executeQuery<PetsitterProfile>(
 			query,
 			queryParams,
 			env
 		);
+
+		const enrichedProfile = profile.map((petsitter) => ({
+			...petsitter,
+			profile_image_url: `${petsitter.id}/profile-image`,
+		}));
+
+		return enrichedProfile;
 	},
 
 	// TODO: Replace with createPetsitter (auth handles user creation)
