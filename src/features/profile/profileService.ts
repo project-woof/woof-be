@@ -52,7 +52,7 @@ export const profileService = {
 		return enrichedProfile;
 	},
 
-	// Updated getPetsitterList function in profileService.ts
+	// Get list of petsitters with pagination
 	getPetsitterList: async (
 		userLat: number,
 		userLon: number,

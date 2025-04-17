@@ -56,7 +56,7 @@ export const profileHandler = async (
 		return new Response(JSON.stringify(petsitterProfile[0]), { status: 200 });
 	}
 
-	// Updated handler in profileHandler.ts
+	// Get list of petsitters with pagination
 	if (
 		url.pathname.startsWith("/profile/getPetsitterList") &&
 		request.method === "GET"
@@ -126,7 +126,6 @@ export const profileHandler = async (
 		}
 	}
 
-	// TODO: Replace with createPetsitter (auth handles user creation)
 	// Create a new profile
 	if (
 		url.pathname.startsWith("/profile/createProfile") &&

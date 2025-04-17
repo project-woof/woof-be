@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
 import { D1Dialect } from "kysely-d1";
 
+// better-auth integration
 let auth: ReturnType<typeof betterAuth>;
 export function serverAuth(env: Env) {
 	if (!auth) {
