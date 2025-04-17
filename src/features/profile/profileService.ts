@@ -77,13 +77,6 @@ export const profileService = {
                 p.price,
                 p.description AS petsitter_description,
                 p.service_tags,
-                (
-                    SELECT pi.image_url
-                    FROM petsitter_image pi
-                    WHERE pi.petsitter_id = p.id
-                    ORDER BY pi.created_at ASC
-                    LIMIT 1
-                ) AS first_image,
                 sqrt(
                     (u.latitude - ?)*(u.latitude - ?) +
                     (u.longitude - ?)*(u.longitude - ?)
@@ -166,6 +159,7 @@ export const profileService = {
 		const enrichedProfile = profile.map((petsitter) => ({
 			...petsitter,
 			profile_image_url: `${petsitter.id}/profile-image`,
+			first_image: `${petsitter.id}/petsitter-image/${petsitter.first_image}`,
 		}));
 
 		return enrichedProfile;
