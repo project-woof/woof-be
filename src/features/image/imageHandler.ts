@@ -1,3 +1,4 @@
+import { ImageList } from "@/types/imageTypes";
 import { imageService } from "./imageService";
 
 export const imageHandler = async (
@@ -85,12 +86,15 @@ export const imageHandler = async (
         url.pathname.startsWith("/image/deleteImage/") &&
         request.method === "DELETE"
     ) {
-        const key = url.pathname.replace("/image/deleteImage/", "");
-        if (!key) {
-            return new Response("Key is required to delete an image", { status: 400 });
+        const body = (await request.json()) as ImageList;
+        const { keys } = body;
+        if (!keys) {
+            return new Response(JSON.stringify({ error: "Missing keys" }), {
+                status: 400,
+            });
         }
 
-        const success = await imageService.deleteImageByKey(key, env);
+        const success = await imageService.deleteImageByKey(keys, env);
 
         if (!success) {
             return new Response("Failed to delete image", { status: 500 });

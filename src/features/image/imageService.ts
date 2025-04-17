@@ -31,13 +31,19 @@ export const imageService = {
         env: Env
     ): Promise<string[]> => {
         const keys: string[] = [];
-        const existing = await r2Service.list(`${userId}/petsitter/`, env);
-        const currentCount = existing.objects.length;
+        const existing = await r2Service.list(userId, env);
 
+        if (existing.objects.length > 0) {
+            const deleteKeys = existing.objects.map((obj) => obj.key);
+            await r2Service.delete(deleteKeys, env);
+        }
+        let currentCount = 0;
+        const MAX_IMAGES = 6
+        const limit = files.length < MAX_IMAGES ? files.length : MAX_IMAGES
 
-        for (let i = 0; i < files.length; i++) {
-            const index = currentCount + i + 1;
-            const key = `${userId}/petsitter/${index}`;
+        for (let i = 0; i < limit; i++) {
+            currentCount++
+            const key = `${userId}/petsitter/${currentCount}`;
             const uploaded = await r2Service.put(key, files[i], env);
             if (uploaded) {
                 keys.push(key);
@@ -48,8 +54,8 @@ export const imageService = {
     },
 
     // delete a image
-    deleteImageByKey: async (key: string, env: Env): Promise<boolean> => {
-        return await r2Service.delete(key, env);
+    deleteImageByKey: async (keys: string[], env: Env): Promise<boolean> => {
+        return await r2Service.delete(keys, env);
     },
     
 };
