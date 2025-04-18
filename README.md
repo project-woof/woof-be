@@ -11,6 +11,7 @@ To run the backend:
 
 ```bash
 npm install
+npx wrangler d1 execute PETSITTER_DB --local --file=remote_dump.sql
 npm run dev
 ```
 
